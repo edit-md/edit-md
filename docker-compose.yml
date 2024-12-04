@@ -1,0 +1,26 @@
+services:
+    keydb-state:
+        image: bitnami/keydb:6.3.4
+        ports:
+            - 6379:6379
+        environment:
+            - KEYDB_DATABASE=state
+            - KEYDB_PASSWORD=1234
+    nginx-ssl:
+        build:
+            context: ./dev/nginx/
+        ports:
+            - "80:80"
+            - "443:443"
+        environment:
+            - ACCOUNT_SERVICE=http://host.docker.internal:8080
+            - FRONTEND_SERVICE=http://host.docker.internal:8085
+            - FILE_SERVICE=http://localhost
+            - DOCUMENT_SERVICE=http://localhost
+        container_name: nginx-ssl-container
+        networks:
+            - nginx-net
+
+networks:
+    nginx-net:
+        driver: bridge
