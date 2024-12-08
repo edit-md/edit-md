@@ -1,5 +1,8 @@
 package md.edit.services.account.security
 
+import md.edit.services.account.security.apikeyauth.ApiKeyAuthenticationFilter
+import md.edit.services.account.security.csrf.CsrfFilter
+import md.edit.services.account.security.oauth.CustomOAuth2UserService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,7 +16,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val customOAuth2UserService: CustomOAuth2UserService,
+    private val apiAuthenticationFilter: ApiKeyAuthenticationFilter
+) {
 
     @Value("\${edit-md.frontend.host}")
     private lateinit var applicationHost: String
@@ -23,6 +29,9 @@ class SecurityConfig {
 
         // Add the CSRF filter before the UsernamePasswordAuthenticationFilter
         http.addFilterBefore(CsrfFilter(), UsernamePasswordAuthenticationFilter::class.java)
+
+        // Add the API authentication filter before the UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(apiAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         // Disable the default CSRF protection
         http.csrf { it.disable() }
@@ -47,7 +56,10 @@ class SecurityConfig {
 
         http.oauth2Login {
             it.loginPage("/") // This disables the automatic redirect to the authorization server
-            it.defaultSuccessUrl("${applicationHost}/dashboard", true)
+            it.defaultSuccessUrl("${applicationHost}/dashboard", true) // ToDo: Redirect to the correct URL
+            it.userInfoEndpoint { userInfo ->
+                userInfo.userService(customOAuth2UserService)
+            }
         }
 
         http.exceptionHandling {

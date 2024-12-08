@@ -1,4 +1,4 @@
-package md.edit.services.account.security
+package md.edit.services.account.security.csrf
 
 import jakarta.servlet.*
 import jakarta.servlet.http.HttpServletRequest
@@ -22,8 +22,6 @@ class CsrfFilter: Filter {
         val httpRequest = request as HttpServletRequest
         val httpResponse = response as HttpServletResponse
 
-        val csrfValue = httpRequest.getHeader(csrfHeader)
-
         // Allow preflight requests
         if(httpRequest.method == "OPTIONS") {
             chain.doFilter(httpRequest, httpResponse)
@@ -35,6 +33,14 @@ class CsrfFilter: Filter {
             chain.doFilter(httpRequest, httpResponse)
             return
         }
+
+        // Allow requests with X-API-KEY header
+        if(httpRequest.getHeader("X-API-KEY") != null) {
+            chain.doFilter(httpRequest, httpResponse)
+            return
+        }
+
+        val csrfValue = httpRequest.getHeader(csrfHeader)
 
         // Check if the CSRF header is present and if it is not, return a 403 response
         if (csrfValue == null || csrfValue.isEmpty()) {

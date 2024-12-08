@@ -17,9 +17,22 @@ services:
             - FRONTEND_SERVICE=http://host.docker.internal:8085
             - FILE_SERVICE=http://localhost
             - DOCUMENT_SERVICE=http://localhost
-        container_name: nginx-ssl-container
         networks:
             - nginx-net
+    accounts-db:
+        image: postgres:13.3
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_DB=accounts
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=1234
+        volumes:
+            #- ./dev/db/accounts/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - accounts-db:/var/lib/postgresql/data
+
+volumes:
+    accounts-db:
 
 networks:
     nginx-net:
