@@ -2,11 +2,16 @@ package md.edit.services.account.security.oauth
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.user.OAuth2User
+import java.io.Serializable
 
 class CustomOAuth2User(
     private val delegate: OAuth2User,
     private val additionalAttributes: MutableMap<String, Any> = mutableMapOf()
-) : OAuth2User {
+) : OAuth2User, Serializable {
+
+    companion object {
+        private const val serialVersionUID = 1L
+    }
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority>? = delegate.authorities
     override fun getName(): String = delegate.name
