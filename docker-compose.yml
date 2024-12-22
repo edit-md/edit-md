@@ -1,11 +1,5 @@
 services:
-    keydb-state:
-        image: bitnami/keydb:6.3.4
-        ports:
-            - 6379:6379
-        environment:
-            - KEYDB_DATABASE=state
-            - KEYDB_PASSWORD=1234
+    # Reverse proxy for the frontend and other services
     nginx-ssl:
         build:
             context: ./dev/nginx/
@@ -19,8 +13,19 @@ services:
             - DOCUMENT_SERVICE=http://localhost
         networks:
             - nginx-net
+
+    # Account service
+    keydb-state:
+        image: bitnami/keydb:6.3.4
+        ports:
+            - 6379:6379
+        environment:
+            - KEYDB_DATABASE=state
+            - KEYDB_PASSWORD=1234
+
     accounts-db:
-        image: postgres:13.3
+        image: postgres:17.2
+        restart: always
         ports:
             - "5432:5432"
         environment:
@@ -28,8 +33,13 @@ services:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=1234
         volumes:
-            #- ./dev/db/accounts/init.sql:/docker-entrypoint-initdb.d/init.sql
             - accounts-db:/var/lib/postgresql/data
+            - ./dev/db/accounts/init:/docker-entrypoint-initdb.d
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U admin"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
 volumes:
     accounts-db:
