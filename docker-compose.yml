@@ -49,6 +49,11 @@ services:
         build:
             context: ./services/account-service
         environment:
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_FRONTEND_HOST=${EDITMD_FRONTEND_HOST}
+
+            - SPRING_PROFILES_ACTIVE=prod
+
             - SPRING_DATASOURCE_URL=jdbc:postgresql://accounts-db:5432/${ACCOUNT_DB_NAME}
             - SPRING_DATASOURCE_USERNAME=${ACCOUNT_DB_USER}
             - SPRING_DATASOURCE_PASSWORD=${ACCOUNT_DB_PASSWORD}
