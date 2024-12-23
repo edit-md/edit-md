@@ -8,7 +8,7 @@ services:
             - "443:443"
         environment:
             - ACCOUNT_SERVICE=http://account-service:8080
-            - FRONTEND_SERVICE=http://host.docker.internal:8085
+            - FRONTEND_SERVICE=http://frontend:5173
             - FILE_SERVICE=http://localhost
             - DOCUMENT_SERVICE=http://document-service:8080
         networks:
@@ -133,6 +133,30 @@ services:
             retries: 5
         networks:
             - document-service-net
+
+    # Frontend service
+    frontend:
+        build:
+            context: ./services/frontend
+            target: dev
+        environment:
+            - EDITMD_DOMAIN=${EDITMD_DOMAIN}
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
+
+        develop:
+            watch:
+                - path: ./services/frontend/src
+                  action: sync
+                  target: /app/src
+                - path: ./services/frontend/static
+                  action: sync
+                  target: /app/static
+                - path: ./services/frontend/package.json
+                  action: rebuild
+        networks:
+            - nginx-net
+            - account-service-access
 
 volumes:
     accounts-db:

@@ -28,6 +28,11 @@ COPY --from=dev-deps /app/node_modules /app/node_modules
 COPY . ./
 RUN pnpm run build
 
+FROM base AS dev
+COPY --from=dev-deps /app/node_modules /app/node_modules
+COPY . ./
+CMD [ "pnpm", "run", "dev" ]
+
 # Final image for production, includes only necessary files
 FROM node:22-slim AS production
 

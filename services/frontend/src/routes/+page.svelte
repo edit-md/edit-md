@@ -1,2 +1,16 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import DashboardContent from "$lib/home/dashboardContent.svelte";
+	import StartContent from "$lib/home/startContent.svelte";
+    import type { PageData } from "./$types";
+
+    let { data }: { data: PageData } = $props();
+    let loggedIn = $state(data.user !== undefined);
+    let user = $state(data.user);
+</script>
+
+
+{#if loggedIn}
+    <DashboardContent {user} />
+{:else}
+    <StartContent />
+{/if}
