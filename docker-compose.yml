@@ -15,21 +15,22 @@ services:
             - nginx-net
 
     # Account service
-    keydb-sessions:
+    accounts-sessions-db:
         image: bitnami/keydb:6.3.4
-        ports:
-            - 6379:6379
         environment:
             - KEYDB_DATABASE=state
             - KEYDB_PASSWORD=${SESSION_REDIS_PASSWORD}
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
         networks:
             - account-service-net
 
     accounts-db:
         image: postgres:17.2
         restart: always
-        # ports:
-        #     - "5432:5432"
         environment:
             - POSTGRES_DB=${ACCOUNT_DB_NAME}
             - POSTGRES_USER=${ACCOUNT_DB_USER}
@@ -58,7 +59,7 @@ services:
             - SPRING_DATASOURCE_USERNAME=${ACCOUNT_DB_USER}
             - SPRING_DATASOURCE_PASSWORD=${ACCOUNT_DB_PASSWORD}
 
-            - REDIS_HOST=keydb-sessions
+            - REDIS_HOST=accounts-sessions-db
             - REDIS_PORT=6379
             - REDIS_PASSWORD=${SESSION_REDIS_PASSWORD}
 
@@ -66,6 +67,7 @@ services:
             - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
         depends_on:
             - accounts-db
+            - accounts-sessions-db
         networks:
             - nginx-net
             - account-service-net
