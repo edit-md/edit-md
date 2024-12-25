@@ -1,74 +1,51 @@
 <script lang="ts">
-    let { document } = $props();
+	import IconDelete from '$lib/icons/iconDelete.svelte';
+	import IconKebabVertical from '$lib/icons/iconKebabVertical.svelte';
+	import IconShare from '$lib/icons/iconShare.svelte';
+	import { DropdownMenu } from 'bits-ui';
 
-    let showDropdown = $state(false);
-
-    function toggleDropdown() {
-        showDropdown = !showDropdown;
-    }
-
-    function handleDelete() {
-        // Add your delete logic here
-        console.log('Delete clicked');
-    }
+	let { document } = $props();
 </script>
 
-<div class="bg-zinc-800 rounded-lg overflow-clip flex">
-    <div class="documentPreview leading-[.9rem] text-justify text-zinc-400 font-mono">
-        {document.preview}    
-    </div>
-
-    <div class="px-3 pb-3 pt-1 w-48 flex-shrink-0">
-        <div class="relative">
-            <h1 class="text-white text-xl font-bold truncate">{document.title}</h1>
-            <p class="text-zinc-400 mb-4 text-sm">{document.lastEdit}</p>
-            <div class="flex space-x-2">
-                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
-            </div>
-        
-            <div class="dropdown">
-                <button on:click={toggleDropdown} class="w-7 h-7 text-zinc-300 rounded hover:bg-zinc-700">⋮</button>
-                <div class="dropdown-content {showDropdown ? 'show' : ''}">
-                    <a href="#" on:click={handleDelete}>Delete</a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
+<div class="overflow-clip rounded-md border border-muted">
+	<div class="px-3 pb-2 pt-1">
+		<div class="relative">
+			<h1 class="truncate text-xl font-bold">{document.title}</h1>
+			<p class="text-sm text-foreground-50">{document.lastEdit}</p>
+		</div>
+	</div>
+	<div class="flex items-stretch justify-between border-t border-muted">
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger
+				class="flex w-fit items-center justify-center border-r border-muted px-3 hover:bg-muted"
+			>
+				<IconKebabVertical class="h-4 w-4" />
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content
+				class="w-full max-w-[150px] rounded-lg border border-muted bg-background px-1 py-[5px] shadow-popover"
+				sideOffset={2}
+				align="start"
+			>
+				<DropdownMenu.Item
+					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+				>
+					<div class="flex items-center gap-2">
+						<IconShare class="h-4 w-4" />
+						Share
+					</div>
+				</DropdownMenu.Item>
+				<DropdownMenu.Item
+					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+				>
+					<div class="flex items-center gap-2">
+						<IconDelete class="h-4 w-4" />
+						Delete
+					</div>
+				</DropdownMenu.Item>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+		<button class="flex items-center justify-center border-l border-muted px-4 py-2 hover:bg-muted">
+			Edit
+		</button>
+	</div>
 </div>
-<style>
-
-    .documentPreview {
-        zoom: 0.25;
-        height: 60rem;
-    }
-
-    .dropdown {
-        position: absolute;
-        top: 0;
-        right: 0;
-    }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        right: 0;
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-    .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-    }
-    .dropdown-content a:hover {
-        background-color: #f1f1f1;
-    }
-    .show {
-        display: block;
-    }
-</style>
-
