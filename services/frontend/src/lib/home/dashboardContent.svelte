@@ -44,7 +44,7 @@
 
 	.pageContainer {
 		width: 100%;
-		height: 100dvh;
+		min-height: 100dvh;
 		display: grid;
 		grid-template-rows: 3rem 1fr;
 	}

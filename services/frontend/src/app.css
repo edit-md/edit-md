@@ -3,7 +3,7 @@
 @import 'tailwindcss/utilities';
 
 html {
-	@apply text-foreground;
+	@apply text-foreground bg-background;
 }
 
 :root {
