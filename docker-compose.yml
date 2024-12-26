@@ -49,12 +49,12 @@ services:
     account-service:
         build:
             context: ./services/account-service
+            target: dev
+        restart: always
         environment:
             - EDITMD_API_KEY=${EDITMD_API_KEY}
             - EDITMD_FRONTEND_HOST=${EDITMD_FRONTEND_HOST}
-
-            - SPRING_PROFILES_ACTIVE=prod
-
+            
             - SPRING_DATASOURCE_URL=jdbc:postgresql://accounts-db:5432/${ACCOUNT_DB_NAME}
             - SPRING_DATASOURCE_USERNAME=${ACCOUNT_DB_USER}
             - SPRING_DATASOURCE_PASSWORD=${ACCOUNT_DB_PASSWORD}
@@ -71,6 +71,13 @@ services:
         networks:
             - nginx-net
             - account-service-net
+        develop:
+            watch:
+                - path: ./services/account-service/src  # Watch for changes in the source folder
+                  action: sync  # Sync the changes
+                  target: /app/src  # Sync to container's source directory
+                - path: ./services/account-service/pom.xml  # Watch for changes in pom.xml
+                  action: rebuild
 
 volumes:
     accounts-db:
