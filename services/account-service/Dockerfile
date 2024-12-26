@@ -22,8 +22,13 @@ RUN apt-get update && apt-get install -y entr
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
+COPY springAutoCompile.sh .
+RUN chmod +x springAutoCompile.sh
+
 COPY . .
-CMD ["./springAutoCompile.sh"]
+
+EXPOSE 8080
+CMD ["sh", "./springAutoCompile.sh"]
 
 # Production Stage
 FROM gcr.io/distroless/java21:nonroot
