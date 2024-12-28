@@ -143,7 +143,6 @@ services:
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
             - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
-
         develop:
             watch:
                 - path: ./services/frontend/src
@@ -154,6 +153,8 @@ services:
                   target: /app/static
                 - path: ./services/frontend/package.json
                   action: rebuild
+        volumes:
+            - ./services/frontend/.svelte-kit:/app/.svelte-kit
         networks:
             - nginx-net
             - account-service-access

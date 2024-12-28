@@ -1,24 +1,24 @@
 <script>
-	import IconGithub from "$lib/icons/iconGithub.svelte";
+	import IconGithub from '$lib/icons/iconGithub.svelte';
 
 	async function login() {
-		// clear the EDITMD_SESSION cookie
-		
+		window.location.href = '/api/accounts/oauth2/authorization/github';
 	}
-
 </script>
+
 <div class="w-full bg-background">
-	<section class="container mx-auto flex h-screen items-center">
+	<section class="container mx-auto flex h-screen items-center p-4">
 		<div>
 			<h1 class="text-6xl"># edit.md</h1>
 			<h2 class="mt-2 text-4xl text-foreground-80">The collaborative Markdown editor</h2>
 
-			<a href="/api/accounts/oauth2/authorization/github">
-				<button class="text-whitetext-xl mt-6 rounded-md bg-muted px-4 py-4 flex items-center gap-4 hover:bg-foreground-10">
-					<IconGithub class="w-6 h-6" />
-					Sign in with GitHub
-				</button>
-			</a>
+			<button
+				class="text-whitetext-xl mt-6 flex items-center gap-4 rounded-md bg-foreground-10 px-4 py-4 hover:bg-foreground-20"
+				onclick={login}
+			>
+				<IconGithub class="h-6 w-6" />
+				Sign in with GitHub
+			</button>
 		</div>
 	</section>
 </div>

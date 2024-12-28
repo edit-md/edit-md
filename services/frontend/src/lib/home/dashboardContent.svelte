@@ -1,15 +1,12 @@
 <script lang="ts">
 	import DocumentCard from '$lib/components/documentCard.svelte';
-	import Profile from '$lib/components/profile.svelte';
+	import Header from '$lib/components/header.svelte';
 
 	let { user } = $props();
 </script>
 
 <div class="pageContainer bg-background">
-	<div class="header bg-background-alt">
-		<h1 class="text-xl"># edit.md</h1>
-		<Profile {user} />
-	</div>
+	<Header {user}></Header>
 	<div class="contentContainer container mx-auto p-4">
 		<h1 class="text-2xl font-bold">Your Documents</h1>
 		<p class="mb-2 text-lg text-foreground-80">
@@ -46,21 +43,11 @@
 		width: 100%;
 		min-height: 100dvh;
 		display: grid;
-		grid-template-rows: 3rem 1fr;
+		grid-template-rows: min-content 1fr;
 	}
 
 	.contentContainer {
 		height: 100%;
 		width: 100%;
-	}
-
-	.header {
-		top: 0;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		position: sticky;
-		z-index: 100;
-		padding: 1rem;
 	}
 </style>

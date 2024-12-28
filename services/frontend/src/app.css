@@ -3,19 +3,19 @@
 @import 'tailwindcss/utilities';
 
 html {
-	@apply text-foreground bg-background;
+	@apply bg-background text-foreground;
 }
 
 :root {
 	--background: 0 0% 100%;
-	--background-alt: 0 0% 100%;
+	--background-alt: 0 0% 95%;
 
-	--foreground: 0 0% 9%;
+	--foreground: 0 0% 8%;
 
-	--muted: 240 5% 96%;
+	--muted: 240 5% 90%;
 	--muted-foreground: 0 0% 9% / 0.4;
 
-	--border: 240 6% 10%;
+	--border: 240 6% 5%;
 	--border-input: 240 6% 10% / 0.17;
 	--border-input-hover: 240 6% 10% / 0.4;
 	--border-card: 240 6% 10% / 0.1;
