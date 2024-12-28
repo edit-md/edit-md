@@ -1,13 +1,30 @@
 import type { ServerLoadEvent } from '@sveltejs/kit';
 import type { LayoutRouteId, RouteParams } from '../routes/$types';
 
-export function fetchProxy(
+export class SessionError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'SessionError';
+	}
+}
+
+/**
+ * Fetch a URL, adding the EDITMD_SESSION cookie from the request to the headers
+ * @param req The request object
+ * @param url The URL to fetch
+ * @param options Fetch options
+ */
+export async function fetchProxy(
 	req: ServerLoadEvent<RouteParams, {}, LayoutRouteId>,
 	url: string,
 	options: RequestInit = {}
 ): Promise<Response> {
 	// Extract the EDITMD_SESSION cookie from req.cookies
 	const editmdSessionCookie = req.cookies.get('EDITMD_SESSION');
+
+	if(editmdSessionCookie === undefined) {
+		throw new SessionError('EDITMD_SESSION cookie not found');
+	}
 
 	// Ensure options.headers is an instance of Headers, or convert to it
 	if (!(options.headers instanceof Headers)) {
@@ -23,6 +40,15 @@ export function fetchProxy(
 		options.headers.set('Cookie', `${existingCookie}; EDITMD_SESSION=${editmdSessionCookie}`);
 	}
 
-	// Send the request to the URL with updated options using fetch
-	return fetch(url, options);
+	var resp = await fetch(url, options);
+
+	// if unauthorized, remove the EDITMD_SESSION cookie
+	if (resp.status === 401) {
+		req.cookies.delete('EDITMD_SESSION', {
+			path: '/',
+		});
+		throw new SessionError('Unauthorized');
+	}
+
+	return resp;
 }

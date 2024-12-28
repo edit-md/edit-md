@@ -1,4 +1,4 @@
-import { fetchProxy } from '$lib/fetchLib';
+import { fetchProxy, SessionError } from '$lib/fetchLib';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async (req) => {
@@ -14,19 +14,20 @@ export const load: LayoutServerLoad = async (req) => {
 
 		if (resp.ok) {
 			let user = await resp.json();
-	
+
 			return {
 				user: user
 			};
 		}
 	} catch (e) {
-		if(e instanceof DOMException && e.name === 'AbortError') {
+		if (e instanceof SessionError) {
+			// ignored
+		} else if (e instanceof DOMException && e.name === 'AbortError') {
 			console.log('Request to account-service timed out');
 		} else {
-			console.error(e);
+			console.error('Unexpected error:', e);
 		}
 	}
-
 
 	return {};
 };
