@@ -1,28 +1,41 @@
-# Stage 1: Build Stage
+# Build Stage
 FROM maven:3.9.5-eclipse-temurin-21 AS build
-
-# Set working directory
 WORKDIR /app
 
-# Copy the POM file and download dependencies
+# Copy only the pom.xml to leverage Docker cache for dependencies
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy the rest of the project and build
+# Copy the source code and build
 COPY src ./src
 RUN mvn -T 1C clean package -DskipTests
 
-# Stage 2: Runtime Stage
-FROM gcr.io/distroless/java21:nonroot
+# Development Stage
+FROM maven:3.9.5-eclipse-temurin-21 AS dev
+ENV SPRING_PROFILES_ACTIVE=dev
 
-# Set working directory
 WORKDIR /app
 
-# Copy the JAR from the build stage
+# Install entr (file-watcher) in a single layer
+RUN apt-get update && apt-get install -y entr
+
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+COPY springAutoCompile.sh .
+RUN chmod +x springAutoCompile.sh
+
+COPY . .
+
+EXPOSE 8080
+CMD ["sh", "./springAutoCompile.sh"]
+
+# Production Stage
+FROM gcr.io/distroless/java21:nonroot
+ENV SPRING_PROFILES_ACTIVE=prod
+
+WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose the application's port
 EXPOSE 8080
-
-# Run the application
 CMD ["app.jar"]

@@ -10,11 +10,12 @@ services:
             - ACCOUNT_SERVICE=http://account-service:8080
             - FRONTEND_SERVICE=http://host.docker.internal:8085
             - FILE_SERVICE=http://localhost
-            - DOCUMENT_SERVICE=http://localhost
+            - DOCUMENT_SERVICE=http://document-service:8080
         networks:
             - nginx-net
         depends_on:
             - account-service
+            - document-service
 
     # Account service
     accounts-sessions-db:
@@ -81,11 +82,59 @@ services:
                 - path: ./services/account-service/pom.xml  # Watch for changes in pom.xml
                   action: rebuild
 
+    # Document service
+    document-service:
+        build:
+            context: ./services/document-service
+            target: dev
+        restart: always
+        environment:
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_FRONTEND_HOST=${EDITMD_FRONTEND_HOST}
+
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://documents-db:5432/${DOCUMENT_DB_NAME}
+            - SPRING_DATASOURCE_USERNAME=${DOCUMENT_DB_USER}
+            - SPRING_DATASOURCE_PASSWORD=${DOCUMENT_DB_PASSWORD}
+        depends_on:
+            - account-service
+            - documents-db
+        networks:
+            - nginx-net
+            - document-service-net
+        develop:
+            watch:
+                - path: ./services/document-service/src  # Watch for changes in the source folder
+                  action: sync  # Sync the changes
+                  target: /app/src  # Sync to container's source directory
+                - path: ./services/document-service/pom.xml  # Watch for changes in pom.xml
+                  action: rebuild
+
+    documents-db:
+        image: postgres:17.2
+        restart: always
+        environment:
+            - POSTGRES_DB=${DOCUMENT_DB_NAME}
+            - POSTGRES_USER=${DOCUMENT_DB_USER}
+            - POSTGRES_PASSWORD=${DOCUMENT_DB_PASSWORD}
+        volumes:
+            - document-db:/var/lib/postgresql/data
+            - ./dev/db/documents/init:/docker-entrypoint-initdb.d
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U admin" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - document-service-net
+
 volumes:
     accounts-db:
+    document-db:
 
 networks:
     nginx-net:
         driver: bridge
     account-service-net:
+        driver: bridge
+    document-service-net:
         driver: bridge
