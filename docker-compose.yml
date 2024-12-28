@@ -13,6 +13,8 @@ services:
             - DOCUMENT_SERVICE=http://localhost
         networks:
             - nginx-net
+        depends_on:
+            - account-service
 
     # Account service
     accounts-sessions-db:
@@ -21,7 +23,7 @@ services:
             - KEYDB_DATABASE=state
             - KEYDB_PASSWORD=${SESSION_REDIS_PASSWORD}
         healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
+            test: [ "CMD", "keydb-cli", "-a", "${SESSION_REDIS_PASSWORD}", "--raw", "incr", "ping" ]
             interval: 10s
             timeout: 5s
             retries: 5
@@ -39,7 +41,7 @@ services:
             - accounts-db:/var/lib/postgresql/data
             - ./dev/db/accounts/init:/docker-entrypoint-initdb.d
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U admin"]
+            test: [ "CMD-SHELL", "pg_isready -U admin" ]
             interval: 10s
             timeout: 5s
             retries: 5
