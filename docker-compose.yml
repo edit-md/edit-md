@@ -1,11 +1,5 @@
 services:
-    keydb-state:
-        image: bitnami/keydb:6.3.4
-        ports:
-            - 6379:6379
-        environment:
-            - KEYDB_DATABASE=state
-            - KEYDB_PASSWORD=1234
+    # Reverse proxy for the frontend and other services
     nginx-ssl:
         build:
             context: ./dev/nginx/
@@ -13,14 +7,85 @@ services:
             - "80:80"
             - "443:443"
         environment:
-            - ACCOUNT_SERVICE=http://host.docker.internal:8080
+            - ACCOUNT_SERVICE=http://account-service:8080
             - FRONTEND_SERVICE=http://host.docker.internal:8085
             - FILE_SERVICE=http://localhost
             - DOCUMENT_SERVICE=http://localhost
-        container_name: nginx-ssl-container
         networks:
             - nginx-net
+        depends_on:
+            - account-service
+
+    # Account service
+    accounts-sessions-db:
+        image: bitnami/keydb:6.3.4
+        environment:
+            - KEYDB_DATABASE=state
+            - KEYDB_PASSWORD=${SESSION_REDIS_PASSWORD}
+        healthcheck:
+            test: [ "CMD", "keydb-cli", "-a", "${SESSION_REDIS_PASSWORD}", "--raw", "incr", "ping" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - account-service-net
+
+    accounts-db:
+        image: postgres:17.2
+        restart: always
+        environment:
+            - POSTGRES_DB=${ACCOUNT_DB_NAME}
+            - POSTGRES_USER=${ACCOUNT_DB_USER}
+            - POSTGRES_PASSWORD=${ACCOUNT_DB_PASSWORD}
+        volumes:
+            - accounts-db:/var/lib/postgresql/data
+            - ./dev/db/accounts/init:/docker-entrypoint-initdb.d
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U admin" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - account-service-net
+
+    account-service:
+        build:
+            context: ./services/account-service
+            target: dev
+        restart: always
+        environment:
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_FRONTEND_HOST=${EDITMD_FRONTEND_HOST}
+            
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://accounts-db:5432/${ACCOUNT_DB_NAME}
+            - SPRING_DATASOURCE_USERNAME=${ACCOUNT_DB_USER}
+            - SPRING_DATASOURCE_PASSWORD=${ACCOUNT_DB_PASSWORD}
+
+            - REDIS_HOST=accounts-sessions-db
+            - REDIS_PORT=6379
+            - REDIS_PASSWORD=${SESSION_REDIS_PASSWORD}
+
+            - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID}
+            - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
+        depends_on:
+            - accounts-db
+            - accounts-sessions-db
+        networks:
+            - nginx-net
+            - account-service-net
+        develop:
+            watch:
+                - path: ./services/account-service/src  # Watch for changes in the source folder
+                  action: sync  # Sync the changes
+                  target: /app/src  # Sync to container's source directory
+                - path: ./services/account-service/pom.xml  # Watch for changes in pom.xml
+                  action: rebuild
+
+volumes:
+    accounts-db:
 
 networks:
     nginx-net:
+        driver: bridge
+    account-service-net:
         driver: bridge
