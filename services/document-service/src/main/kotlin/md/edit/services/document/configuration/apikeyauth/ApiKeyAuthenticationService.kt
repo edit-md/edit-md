@@ -1,4 +1,4 @@
-package md.edit.services.account.security.apikeyauth
+package md.edit.services.document.configuration.apikeyauth
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value

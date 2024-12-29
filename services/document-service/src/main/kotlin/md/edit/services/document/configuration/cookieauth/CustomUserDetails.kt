@@ -1,4 +1,4 @@
-package md.edit.services.document.security.cookieauth
+package md.edit.services.document.configuration.cookieauth
 
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
@@ -10,7 +10,7 @@ data class CustomUserDetails(
     val avatar: String
 ) : UserDetails {
 
-    constructor(user: UserDataDTO) : this(user.id, user.username, user.email, user.avatar)
+    constructor(user: UserDataDTO) : this(user.id, user.name, user.email, user.avatar)
 
     override fun getAuthorities() = null
 

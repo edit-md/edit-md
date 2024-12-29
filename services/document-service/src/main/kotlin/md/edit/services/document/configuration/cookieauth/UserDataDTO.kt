@@ -1,10 +1,10 @@
-package md.edit.services.document.security.cookieauth
+package md.edit.services.document.configuration.cookieauth
 
 import java.util.*
 
 data class UserDataDTO (
     val id: UUID,
-    val username: String,
+    val name: String,
     val email: String,
     val avatar: String
 )

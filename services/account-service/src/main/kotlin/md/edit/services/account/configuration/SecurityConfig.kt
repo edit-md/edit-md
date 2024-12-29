@@ -1,8 +1,8 @@
-package md.edit.services.account.security
+package md.edit.services.account.configuration
 
-import md.edit.services.account.security.apikeyauth.ApiKeyAuthenticationFilter
-import md.edit.services.account.security.csrf.CsrfFilter
-import md.edit.services.account.security.oauth.CustomOAuth2UserService
+import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthenticationFilter
+import md.edit.services.account.configuration.csrf.CsrfFilter
+import md.edit.services.account.configuration.oauth.CustomOAuth2UserService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,7 +21,7 @@ class SecurityConfig(
     private val apiAuthenticationFilter: ApiKeyAuthenticationFilter
 ) {
 
-    @Value("\${edit-md.frontend.host}")
+    @Value("\${edit-md.domain}")
     private lateinit var applicationHost: String
 
     @Bean
@@ -56,7 +56,7 @@ class SecurityConfig(
 
         http.oauth2Login {
             it.loginPage("/") // This disables the automatic redirect to the authorization server
-            it.defaultSuccessUrl("${applicationHost}/dashboard", true) // ToDo: Redirect to the correct URL
+            it.defaultSuccessUrl(applicationHost, true)
             it.userInfoEndpoint { userInfo ->
                 userInfo.userService(customOAuth2UserService)
             }

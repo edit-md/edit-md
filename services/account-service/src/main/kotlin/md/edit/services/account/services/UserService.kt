@@ -1,17 +1,15 @@
 package md.edit.services.account.services
 
+import md.edit.services.account.configuration.oauth.CustomOAuth2User
+import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
-import md.edit.services.account.security.oauth.CustomOAuth2User
-import md.edit.services.account.security.oauth.CustomOAuth2UserRequest
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
-import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class UserService(

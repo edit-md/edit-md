@@ -1,8 +1,8 @@
-package md.edit.services.document.security
+package md.edit.services.document.configuration
 
-import md.edit.services.document.security.apikeyauth.ApiKeyAuthenticationFilter
-import md.edit.services.document.security.cookieauth.CookieAuthenticationFilter
-import md.edit.services.document.security.csrf.CsrfFilter
+import md.edit.services.document.configuration.apikeyauth.ApiKeyAuthenticationFilter
+import md.edit.services.document.configuration.cookieauth.CookieAuthenticationFilter
+import md.edit.services.document.configuration.csrf.CsrfFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,7 +22,7 @@ class SecurityConfig(
     private val cookieAuthenticationFilter: CookieAuthenticationFilter
 ) {
 
-    @Value("\${edit-md.frontend.host}")
+    @Value("\${edit-md.domain}")
     private lateinit var applicationHost: String
 
     @Bean

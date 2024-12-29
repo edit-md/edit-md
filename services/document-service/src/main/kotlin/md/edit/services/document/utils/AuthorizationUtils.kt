@@ -1,7 +1,7 @@
 package md.edit.services.document.utils
 
-import md.edit.services.document.security.apikeyauth.ApiKeyAuthentication
-import md.edit.services.document.security.cookieauth.CustomUserDetails
+import md.edit.services.document.configuration.apikeyauth.ApiKeyAuthentication
+import md.edit.services.document.configuration.cookieauth.CustomUserDetails
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.web.server.ResponseStatusException

@@ -1,4 +1,4 @@
-package md.edit.services.account.security.apikeyauth
+package md.edit.services.document.configuration.apikeyauth
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain

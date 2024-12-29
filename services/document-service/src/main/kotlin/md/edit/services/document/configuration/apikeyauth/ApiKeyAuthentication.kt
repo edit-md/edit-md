@@ -1,4 +1,4 @@
-package md.edit.services.document.security.apikeyauth
+package md.edit.services.document.configuration.apikeyauth
 
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority

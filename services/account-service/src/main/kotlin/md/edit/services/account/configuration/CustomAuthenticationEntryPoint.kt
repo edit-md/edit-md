@@ -1,4 +1,4 @@
-package md.edit.services.account.security
+package md.edit.services.account.configuration
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

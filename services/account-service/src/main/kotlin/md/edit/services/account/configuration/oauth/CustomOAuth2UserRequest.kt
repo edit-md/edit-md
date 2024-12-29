@@ -1,4 +1,4 @@
-package md.edit.services.account.security.oauth
+package md.edit.services.account.configuration.oauth
 
 data class CustomOAuth2UserRequest(
     var name: String,

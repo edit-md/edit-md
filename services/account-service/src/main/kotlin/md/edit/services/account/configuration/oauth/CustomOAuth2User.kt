@@ -1,4 +1,4 @@
-package md.edit.services.account.security.oauth
+package md.edit.services.account.configuration.oauth
 
 import md.edit.services.account.data.User
 import org.springframework.security.core.GrantedAuthority

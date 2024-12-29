@@ -55,8 +55,10 @@ services:
             target: dev
         restart: always
         environment:
+            - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
-            - EDITMD_FRONTEND_HOST=${EDITMD_FRONTEND_HOST}
+
+            - EDITMD_FRONTEND_HOST=http://frontend
             
             - SPRING_DATASOURCE_URL=jdbc:postgresql://accounts-db:5432/${ACCOUNT_DB_NAME}
             - SPRING_DATASOURCE_USERNAME=${ACCOUNT_DB_USER}
@@ -74,6 +76,7 @@ services:
         networks:
             - nginx-net
             - account-service-net
+            - account-service-access
         develop:
             watch:
                 - path: ./services/account-service/src  # Watch for changes in the source folder
@@ -89,8 +92,11 @@ services:
             target: dev
         restart: always
         environment:
+            - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
-            - EDITMD_FRONTEND_HOST=${EDITMD_FRONTEND_HOST}
+
+            - EDITMD_FRONTEND_HOST=http://frontend
+            - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
 
             - SPRING_DATASOURCE_URL=jdbc:postgresql://documents-db:5432/${DOCUMENT_DB_NAME}
             - SPRING_DATASOURCE_USERNAME=${DOCUMENT_DB_USER}
@@ -101,6 +107,7 @@ services:
         networks:
             - nginx-net
             - document-service-net
+            - account-service-access
         develop:
             watch:
                 - path: ./services/document-service/src  # Watch for changes in the source folder
@@ -135,6 +142,8 @@ networks:
     nginx-net:
         driver: bridge
     account-service-net:
+        driver: bridge
+    account-service-access:
         driver: bridge
     document-service-net:
         driver: bridge
