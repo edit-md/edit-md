@@ -6,7 +6,7 @@ export const load: LayoutServerLoad = async (req) => {
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 500);
 
-		let resp = await fetchProxy(req, 'http://account-service:8080/api/accounts/users/me', {
+		let resp = await fetchProxy(req, 'http://account-service:8080/api/accounts/me', {
 			signal: controller.signal
 		});
 

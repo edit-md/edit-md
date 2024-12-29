@@ -55,6 +55,7 @@ services:
             target: dev
         restart: always
         environment:
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
 
@@ -76,7 +77,6 @@ services:
         networks:
             - nginx-net
             - account-service-net
-            - account-service-access
         develop:
             watch:
                 - path: ./services/account-service/src  # Watch for changes in the source folder
@@ -92,6 +92,7 @@ services:
             target: dev
         restart: always
         environment:
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
 
@@ -107,7 +108,6 @@ services:
         networks:
             - nginx-net
             - document-service-net
-            - account-service-access
         develop:
             watch:
                 - path: ./services/document-service/src  # Watch for changes in the source folder
@@ -140,6 +140,7 @@ services:
             context: ./services/frontend
             target: dev
         environment:
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
             - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
@@ -157,7 +158,6 @@ services:
             - ./services/frontend/.svelte-kit:/app/.svelte-kit
         networks:
             - nginx-net
-            - account-service-access
 
 volumes:
     accounts-db:
@@ -167,8 +167,6 @@ networks:
     nginx-net:
         driver: bridge
     account-service-net:
-        driver: bridge
-    account-service-access:
         driver: bridge
     document-service-net:
         driver: bridge
