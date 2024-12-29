@@ -19,7 +19,7 @@ class CustomOAuth2UserService(
         val oauth2User = super.loadUser(originalUserRequest)
 
         val userRequest = CustomOAuth2UserRequest(
-            name = oauth2User.attributes["name"].toString(),
+            name = oauth2User.name,
             email = oauth2User.attributes["email"].toString(),
             avatar = oauth2User.attributes["avatar_url"].toString(),
             remoteId = oauth2User.attributes["id"].toString(),
