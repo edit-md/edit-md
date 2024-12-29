@@ -2,7 +2,9 @@ package md.edit.services.account.controllers
 
 import md.edit.services.account.dtos.UserDTO
 import md.edit.services.account.security.apikeyauth.ApiKeyAuthentication
+import md.edit.services.account.security.oauth.CustomOAuth2User
 import md.edit.services.account.services.UserService
+import md.edit.services.account.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
@@ -37,14 +39,11 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("me")
     fun getMe(authentication: Authentication): ResponseEntity<UserDTO> {
-        val principal = authentication.principal
-
-        if (principal !is OAuth2User)
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "aaa")
+        val user = AuthorizationUtils.onlyUser(authentication)
 
         return ResponseEntity.ok(
             UserDTO.fromUserWithConnectedAccounts(
-                userService.getUser(principal) ?: throw RuntimeException("User not found")
+                userService.getUser(user) ?: throw RuntimeException("User not found")
             )
         )
     }

@@ -15,23 +15,22 @@ class CustomOAuth2UserService(
 ) : DefaultOAuth2UserService() {
 
     @Override
-    override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
-        val user = CustomOAuth2User(super.loadUser(userRequest))
+    override fun loadUser(originalUserRequest: OAuth2UserRequest): OAuth2User {
+        val oauth2User = super.loadUser(originalUserRequest)
 
-        user.addAttribute("accountOrigin", userRequest.clientRegistration.registrationId)
+        val userRequest = CustomOAuth2UserRequest(
+            name = oauth2User.attributes["name"].toString(),
+            email = oauth2User.attributes["email"].toString(),
+            avatar = oauth2User.attributes["avatar_url"].toString(),
+            remoteId = oauth2User.attributes["id"].toString(),
+            accountOrigin = originalUserRequest.clientRegistration.registrationId
+        )
 
         // Fetch the user's primary email from GitHub because it is not provided by the OAuth2 provider
-        if (userRequest.clientRegistration.registrationId == "github") {
-            val email = gitHubService.getPrimaryEmail(userRequest.accessToken.tokenValue)
-            user.addAttribute("email", email)
-            user.addAttribute("avatar", user.attributes["avatar_url"] ?: "")
+        if (userRequest.accountOrigin == "github") {
+            userRequest.email = gitHubService.getPrimaryEmail(originalUserRequest.accessToken.tokenValue)
         }
 
-        // Save the user to the database
-        println("LocalUser: ${userService.getAndUpdateOrCreateUser(user)}")
-
-        println("User: ${user.attributes}")
-
-        return user;
+        return CustomOAuth2User(userService.getAndUpdateOrCreateUser(userRequest), oauth2User)
     }
 }

@@ -1,30 +1,34 @@
 package md.edit.services.account.security.oauth
 
+import md.edit.services.account.data.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.user.OAuth2User
 import java.io.Serializable
+import java.util.*
 
 class CustomOAuth2User(
-    private val delegate: OAuth2User,
-    private val additionalAttributes: MutableMap<String, Any> = mutableMapOf()
+    val id: UUID,
+    val email: String,
+    val avatar: String?,
+    private val delegate: OAuth2User
 ) : OAuth2User, Serializable {
 
     companion object {
         private const val serialVersionUID = 1L
     }
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority>? = delegate.authorities
-    override fun getName(): String = delegate.name
+    constructor(user: User, delegate: OAuth2User) : this(user.id!!, user.email, user.avatar, delegate)
+
+    override fun getName(): String {
+        return delegate.name
+    }
 
     override fun getAttributes(): MutableMap<String, Any> {
-        // Combine original attributes with additional ones
-        return mutableMapOf<String, Any>().apply {
-            putAll(delegate.attributes)
-            putAll(additionalAttributes)
-        }
+        return delegate.attributes
     }
 
-    fun addAttribute(key: String, value: Any) {
-        additionalAttributes[key] = value
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+        return delegate.authorities
     }
+
 }
