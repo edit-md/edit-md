@@ -1,8 +1,9 @@
 package md.edit.services.account.controllers
 
+import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
 import md.edit.services.account.dtos.UserDTO
-import md.edit.services.account.security.apikeyauth.ApiKeyAuthentication
 import md.edit.services.account.services.UserService
+import md.edit.services.account.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
@@ -10,13 +11,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @RestController
-@RequestMapping("users")
 class UserController(private val userService: UserService) {
 
     @GetMapping("/")
@@ -37,14 +36,11 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("me")
     fun getMe(authentication: Authentication): ResponseEntity<UserDTO> {
-        val principal = authentication.principal
-
-        if (principal !is OAuth2User)
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "aaa")
+        val user = AuthorizationUtils.onlyUser(authentication)
 
         return ResponseEntity.ok(
             UserDTO.fromUserWithConnectedAccounts(
-                userService.getUser(principal) ?: throw RuntimeException("User not found")
+                userService.getUser(user) ?: throw RuntimeException("User not found")
             )
         )
     }

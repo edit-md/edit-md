@@ -1,14 +1,15 @@
 package md.edit.services.account.services
 
+import md.edit.services.account.configuration.oauth.CustomOAuth2User
+import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
-import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class UserService(
@@ -22,18 +23,16 @@ class UserService(
      * @return User
      */
     @Transactional
-    fun getAndUpdateOrCreateUser(oAuth2User: OAuth2User): User {
-        val attributes = oAuth2User.attributes
-
-        var user = getUser(oAuth2User)
+    fun getAndUpdateOrCreateUser(request: CustomOAuth2UserRequest): User {
+        var user = getUser(request)
 
         if (user == null) {
             // create user
-            val accountOrigin = attributes["accountOrigin"].toString()
-            val remoteId = attributes["id"].toString()
-            val name = attributes["name"].toString()
-            val email = attributes["email"].toString()
-            val avatar = attributes["avatar"].toString().let { it.ifEmpty { null } }
+            val accountOrigin = request.accountOrigin
+            val remoteId = request.remoteId
+            val name = request.name
+            val email = request.email
+            val avatar = request.avatar
 
             var newUser = User(name, email, avatar)
             newUser = userRepository.save(newUser)
@@ -42,13 +41,9 @@ class UserService(
             user = userRepository.save(newUser)
         } else {
             // update user
-            val name = attributes["name"].toString()
-            val email = attributes["email"].toString()
-            val avatar = attributes["avatar"].toString().let { it.ifEmpty { null } }
-
-            user.name = name
-            user.email = email
-            user.avatar = avatar
+            user.name = request.name
+            user.email = request.email
+            user.avatar = request.avatar
 
             user = userRepository.save(user)
         }
@@ -57,18 +52,23 @@ class UserService(
     }
 
     /**
-     * Gets a user by OAuth2 user
-     * @param oAuth2User OAuth2 user
+     * Gets a user by OAuth2UserRequest
+     * @param request OAuth2UserRequest
      * @return User
      */
     @Transactional
-    fun getUser(oAuth2User: OAuth2User): User? {
+    fun getUser(request: CustomOAuth2UserRequest): User? {
         // get user from database
-        val accountOrigin = oAuth2User.attributes["accountOrigin"].toString()
-        val remoteId = oAuth2User.attributes["id"].toString()
+        val accountOrigin = request.accountOrigin
+        val remoteId = request.remoteId
 
         // get user from database
         return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }.orElse(null)
+    }
+
+    @Transactional
+    fun getUser(oAuth2User: CustomOAuth2User): User? {
+        return userRepository.findById(oAuth2User.id).map { it }.orElse(null)
     }
 
     /**
