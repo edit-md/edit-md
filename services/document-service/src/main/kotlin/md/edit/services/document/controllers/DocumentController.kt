@@ -1,22 +1,69 @@
 package md.edit.services.document.controllers
 
+import md.edit.services.document.dtos.DocumentDTO
+import md.edit.services.document.services.DocumentService
 import md.edit.services.document.utils.AuthorizationUtils
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @RestController
-class DocumentController {
+class DocumentController(
+    private val documentService: DocumentService
+) {
     @GetMapping("/")
-    fun getDocument(authentication: Authentication): String {
-        val api = AuthorizationUtils.onlyAPI(authentication)
+    fun getDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
+        // ToDo: Add Pagination
+        val user = AuthorizationUtils.onlyUser(authentication)
 
-        return "Document for API key ${api.principal}"
+        val documents = documentService.getDocumentsOfUser(user)
+        val documentDTOs = documents.map { DocumentDTO.from(it) }.toMutableList()
+        return ResponseEntity.ok(documentDTOs)
     }
 
-    @GetMapping("/me")
-    fun getMe(authentication: Authentication): String {
+    @GetMapping("/shared")
+    fun getSharedDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
         val user = AuthorizationUtils.onlyUser(authentication)
-        return "Document for user ${user.username} with id ${user.id} and email ${user.email}"
+
+        val documents = documentService.getSharedDocumentsOfUser(user)
+        val documentDTOs = documents.map { DocumentDTO.from(it) }.toMutableList()
+        return ResponseEntity.ok(documentDTOs)
+    }
+
+    @GetMapping("/owned")
+    fun getOwnedDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
+        val documents = documentService.getOwnedDocumentsOfUser(user)
+        val documentDTOs = documents.map { DocumentDTO.from(it) }.toMutableList()
+        return ResponseEntity.ok(documentDTOs)
+    }
+
+    @GetMapping("/{id}")
+    fun getDocument(authentication: Authentication, @PathVariable id: String): ResponseEntity<DocumentDTO> {
+        val uuid = runCatching { UUID.fromString(id) }.getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST) }
+        val document = documentService.getDocumentById(uuid)  ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+
+        // if the request is from an API key, return the document
+        if(AuthorizationUtils.isAPI(authentication) != null) {
+            return ResponseEntity.ok(DocumentDTO.fromDocumentWithShared(document))
+        }
+
+        // if the request is from the owner of the document, return the document
+        AuthorizationUtils.onlyUsers(authentication, listOf(document.owner.toString()))
+        return ResponseEntity.ok(DocumentDTO.fromDocumentWithShared(document))
+    }
+
+    @PostMapping("/")
+    fun createDocument(authentication: Authentication): ResponseEntity<DocumentDTO> {
+        // ToDo: Use a DTO for the input data
+        val user = AuthorizationUtils.onlyUser(authentication)
+        return ResponseEntity.ok(DocumentDTO.from(documentService.createDocument(user)))
     }
 }

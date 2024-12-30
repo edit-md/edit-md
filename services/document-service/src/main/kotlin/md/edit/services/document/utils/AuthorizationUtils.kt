@@ -40,6 +40,25 @@ class AuthorizationUtils {
             return user
         }
 
+        fun onlyUsers(auth: Authentication, ids: List<String>): CustomUserDetails {
+            val user = onlyUser(auth)
+            val uuids = ids.map { runCatching { UUID.fromString(it) }.getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid id") } }
+
+            if(user.id !in uuids) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource")
+            }
+
+            return user
+        }
+
+        fun isAPI(auth: Authentication): ApiKeyAuthentication? {
+            if(auth !is ApiKeyAuthentication) {
+                return null
+            }
+
+            return auth
+        }
+
     }
 
 }
