@@ -3,12 +3,13 @@ services:
     nginx-ssl:
         build:
             context: ./dev/nginx/
+        restart: always
         ports:
             - "80:80"
             - "443:443"
         environment:
             - ACCOUNT_SERVICE=http://account-service:8080
-            - FRONTEND_SERVICE=http://host.docker.internal:8085
+            - FRONTEND_SERVICE=http://frontend:5173
             - FILE_SERVICE=http://file-service:8080
             - DOCUMENT_SERVICE=http://document-service:8080
         networks:
@@ -56,6 +57,7 @@ services:
             target: dev
         restart: always
         environment:
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
 
@@ -77,7 +79,6 @@ services:
         networks:
             - nginx-net
             - account-service-net
-            - account-service-access
         develop:
             watch:
                 - path: ./services/account-service/src  # Watch for changes in the source folder
@@ -93,6 +94,7 @@ services:
             target: dev
         restart: always
         environment:
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
 
@@ -108,7 +110,6 @@ services:
         networks:
             - nginx-net
             - document-service-net
-            - account-service-access
         develop:
             watch:
                 - path: ./services/document-service/src  # Watch for changes in the source folder
@@ -202,6 +203,31 @@ services:
         networks:
             - file-service-net
     
+    # Frontend service
+    frontend:
+        build:
+            context: ./services/frontend
+            target: dev
+        environment:
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
+            - EDITMD_DOMAIN=${EDITMD_DOMAIN}
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
+        develop:
+            watch:
+                - path: ./services/frontend/src
+                  action: sync
+                  target: /app/src
+                - path: ./services/frontend/static
+                  action: sync
+                  target: /app/static
+                - path: ./services/frontend/package.json
+                  action: rebuild
+        volumes:
+            - ./services/frontend/.svelte-kit:/app/.svelte-kit
+        networks:
+            - nginx-net
+
 volumes:
     accounts-db:
     document-db:
@@ -212,8 +238,6 @@ networks:
     nginx-net:
         driver: bridge
     account-service-net:
-        driver: bridge
-    account-service-access:
         driver: bridge
     document-service-net:
         driver: bridge
