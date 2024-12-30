@@ -1,47 +1,48 @@
 package md.edit.services.account.controllers
 
-import org.kohsuke.github.GitHubBuilder
-import org.springframework.beans.factory.annotation.Autowired
+import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
+import md.edit.services.account.dtos.UserDTO
+import md.edit.services.account.services.UserService
+import md.edit.services.account.utils.AuthorizationUtils
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @RestController
-@RequestMapping("user")
-class UserController @Autowired constructor(private val authorizedClientService: OAuth2AuthorizedClientService) {
+class UserController(private val userService: UserService) {
 
     @GetMapping("/")
     fun getUser(@AuthenticationPrincipal principal: OAuth2User): Map<String, Any> {
         return principal.attributes
     }
 
-    @GetMapping("mail")
-    fun getUserMail(): String {
-        println("Getting user mail")
-        val authentication = SecurityContextHolder.getContext()
-        val oauthToken = authentication.authentication as OAuth2AuthenticationToken
-        val client = authorizedClientService.loadAuthorizedClient<OAuth2AuthorizedClient>(
-            oauthToken.authorizedClientRegistrationId,
-            oauthToken.name
-        )
+    @GetMapping("/{id}")
+    fun getUserById(authentication: Authentication, @PathVariable id: String): ResponseEntity<UserDTO> {
+        val uuid = runCatching { UUID.fromString(id) }.getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST) }
+        val user = userService.getUserById(uuid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
-        if (oauthToken.authorizedClientRegistrationId == "github") {
-            return GitHubBuilder().withOAuthToken(client?.accessToken?.tokenValue).build().myself.listEmails()
-                .find { it.isPrimary }?.email ?: ""
-        }
+        if (authentication is ApiKeyAuthentication)
+            return ResponseEntity.ok(UserDTO.fromUserWithConnectedAccounts(user))
 
-        return oauthToken.principal.attributes["email"] as String
+        return ResponseEntity.ok(UserDTO.fromUserPrivate(user))
     }
 
-    @GetMapping("debug")
-    fun debugSecurityContext(): Any {
-        return SecurityContextHolder.getContext().authentication ?: "No Authentication Found"
+    @GetMapping("me")
+    fun getMe(authentication: Authentication): ResponseEntity<UserDTO> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
+        return ResponseEntity.ok(
+            UserDTO.fromUserWithConnectedAccounts(
+                userService.getUser(user) ?: throw RuntimeException("User not found")
+            )
+        )
     }
 
 }

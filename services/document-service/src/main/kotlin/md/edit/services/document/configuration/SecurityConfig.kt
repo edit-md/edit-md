@@ -1,10 +1,14 @@
-package md.edit.services.account.security
+package md.edit.services.document.configuration
 
+import md.edit.services.document.configuration.apikeyauth.ApiKeyAuthenticationFilter
+import md.edit.services.document.configuration.cookieauth.CookieAuthenticationFilter
+import md.edit.services.document.configuration.csrf.CsrfFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -13,9 +17,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val apiAuthenticationFilter: ApiKeyAuthenticationFilter,
+    private val cookieAuthenticationFilter: CookieAuthenticationFilter
+) {
 
-    @Value("\${edit-md.frontend.host}")
+    @Value("\${edit-md.domain}")
     private lateinit var applicationHost: String
 
     @Bean
@@ -23,6 +30,12 @@ class SecurityConfig {
 
         // Add the CSRF filter before the UsernamePasswordAuthenticationFilter
         http.addFilterBefore(CsrfFilter(), UsernamePasswordAuthenticationFilter::class.java)
+
+        // Add the API authentication filter before the UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(apiAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+
+        // Add the CookieAuthenticationFilter before the UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(cookieAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         // Disable the default CSRF protection
         http.csrf { it.disable() }
@@ -45,14 +58,17 @@ class SecurityConfig {
             it.anyRequest().authenticated()
         }
 
-        http.oauth2Login {
-            it.loginPage("/") // This disables the automatic redirect to the authorization server
-            it.defaultSuccessUrl("${applicationHost}/dashboard", true)
-        }
-
         http.exceptionHandling {
             it.authenticationEntryPoint(CustomAuthenticationEntryPoint())
         }
+
+        http.sessionManagement {
+            it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        }
+
+        http.httpBasic{ it.disable() }
+        http.formLogin{ it.disable() }
+        http.logout{ it.disable() }
 
         return http.build()
     }

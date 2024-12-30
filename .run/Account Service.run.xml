@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Account Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="services.account" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="md.edit.services.account.Application" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
-  </configuration>
-</component>
