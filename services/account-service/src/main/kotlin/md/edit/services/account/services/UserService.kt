@@ -5,6 +5,7 @@ import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
+import md.edit.services.account.data.UserSettings
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
 import org.springframework.stereotype.Service
@@ -63,7 +64,8 @@ class UserService(
         val remoteId = request.remoteId
 
         // get user from database
-        return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }.orElse(null)
+        return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }
+            .orElse(null)
     }
 
     @Transactional
@@ -79,6 +81,16 @@ class UserService(
     @Transactional
     fun getUserById(id: UUID): User? {
         return userRepository.findById(id).map { it }.orElse(null)
+    }
+
+    @Transactional
+    fun getUserSettingsByUserId(id: UUID): UserSettings? {
+        return getUserById(id)?.settings
+    }
+
+    @Transactional
+    fun updateUser(user: User) {
+        userRepository.save(user)
     }
 
 }
