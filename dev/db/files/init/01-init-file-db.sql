@@ -6,5 +6,3 @@ CREATE TABLE files (
     CreatedDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_document FOREIGN KEY (DocumentId) REFERENCES Document(Id) ON DELETE CASCADE
 );
-
-CREATE INDEX idx_document_id ON files USING BTREE (DocumentId);
