@@ -1,23 +1,23 @@
 package md.edit.services.file.data
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
-import jakarta.persistence.Id
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Lob
-import jakarta.persistence.Column
+import jakarta.persistence.*
+import java.util.UUID
 
 @Entity
 @Table(name = "files")
 data class File(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: UUID,
 
-    val filename: String,
+    @Column(name = "document_id", nullable = false)
+    val documentId: UUID,
 
-    @Lob
-    @Column(name = "file_data")
-    val fileData: ByteArray
+    @Column(name = "path", nullable = false)
+    val path: String,
+
+    @Column(name = "type", nullable = false)
+    val type: String,
+
+    @Column(name = "created_date", nullable = false)
+    val createdDate: java.time.LocalDateTime
 )
