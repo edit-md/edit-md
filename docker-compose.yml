@@ -9,13 +9,14 @@ services:
         environment:
             - ACCOUNT_SERVICE=http://account-service:8080
             - FRONTEND_SERVICE=http://host.docker.internal:8085
-            - FILE_SERVICE=http://localhost
+            - FILE_SERVICE=http://file-service:8080
             - DOCUMENT_SERVICE=http://document-service:8080
         networks:
             - nginx-net
         depends_on:
             - account-service
             - document-service
+            - file-service
 
     # Account service
     accounts-sessions-db:
@@ -133,10 +134,53 @@ services:
             retries: 5
         networks:
             - document-service-net
+            
+    # File service
+    file-db:
+        image: postgres:17.2
+        restart: always
+        environment:
+            - POSTGRES_DB=${FILE_DB_NAME}
+            - POSTGRES_USER=${FILE_DB_USER}
+            - POSTGRES_PASSWORD=${FILE_DB_PASSWORD}
+        volumes:
+            - file-db:/var/lib/postgresql/data
+            - ./dev/db/files/init:/docker-entrypoint-initdb.d
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U admin" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - file-service-net
 
+    file-service:
+        build:
+            context: ./services/file-service
+            target: dev
+        restart: always
+        environment:
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://file-db:5432/${FILE_DB_NAME}
+            - SPRING_DATASOURCE_USERNAME=${FILE_DB_USER}
+            - SPRING_DATASOURCE_PASSWORD=${FILE_DB_PASSWORD}
+        depends_on:
+            - file-db
+        networks:
+            - nginx-net
+            - file-service-net
+            - account-service-access
+        develop:
+            watch:
+                - path: ./services/file-service/src  # Watch for changes in the source folder
+                  action: sync  # Sync the changes
+                  target: /app/src  # Sync to container's source directory
+                - path: ./services/file-service/pom.xml  # Watch for changes in pom.xml
+                  action: rebuild
+    
 volumes:
     accounts-db:
     document-db:
+    file-db:
 
 networks:
     nginx-net:
@@ -146,4 +190,6 @@ networks:
     account-service-access:
         driver: bridge
     document-service-net:
+        driver: bridge
+    file-service-net:
         driver: bridge
