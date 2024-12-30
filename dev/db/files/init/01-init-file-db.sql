@@ -1,5 +1,10 @@
 CREATE TABLE files (
-    id SERIAL PRIMARY KEY,
-    filename VARCHAR(255) NOT NULL,
-    file_data BYTEA
+    Id UUID PRIMARY KEY,
+    DocumentId UUID NOT NULL,
+    Path TEXT NOT NULL,
+    Type VARCHAR(50) NOT NULL,
+    CreatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_document FOREIGN KEY (DocumentId) REFERENCES Document(Id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_document_id ON files USING BTREE (DocumentId);
