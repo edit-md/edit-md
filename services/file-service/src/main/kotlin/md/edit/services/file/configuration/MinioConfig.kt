@@ -5,6 +5,8 @@ import io.minio.errors.MinioException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import io.minio.BucketExistsArgs
+import io.minio.MakeBucketArgs
 
 @Configuration
 class MinioConfig {
@@ -28,9 +30,13 @@ class MinioConfig {
             .credentials(accessKey, secretKey)
             .build()
 
-        val isBucketExist = minioClient.bucketExists(bucketName)
+        val isBucketExist = minioClient.bucketExists(BucketExistsArgs.builder()
+        .bucket(bucketName)
+        .build())
         if (!isBucketExist) {
-            minioClient.makeBucket(bucketName)
+            minioClient.makeBucket(MakeBucketArgs.builder()
+            .bucket(bucketName)
+            .build())
         }
 
         return minioClient

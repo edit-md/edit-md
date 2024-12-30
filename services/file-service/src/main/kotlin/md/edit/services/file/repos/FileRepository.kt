@@ -1,6 +1,8 @@
 package md.edit.services.file.repos
 
 import io.minio.MinioClient
+import io.minio.PutObjectArgs
+import io.minio.GetObjectArgs
 import io.minio.errors.MinioException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Repository
@@ -18,13 +20,20 @@ class FileRepository(private val minioClient: MinioClient) {
 
     @Throws(IOException::class, MinioException::class, NoSuchAlgorithmException::class, InvalidKeyException::class)
     fun uploadFile(file: MultipartFile): String {
-        val objectName = file.originalFilename ?: throw IOException("filename is null")
+        val objectName = file.originalFilename ?: throw IOException("Filename is null")
 
         file.inputStream.use { inputStream ->
             try {
-                minioClient.putObject(bucketName, objectName, inputStream, file.contentType ?: "application/octet-stream")
+                minioClient.putObject(
+                    PutObjectArgs.builder()
+                        .bucket(bucketName)
+                        .`object`(objectName)
+                        .stream(inputStream, file.size, -1)
+                        .contentType(file.contentType ?: "application/octet-stream")
+                        .build()
+                )
             } catch (e: MinioException) {
-                throw MinioException("Error during upload to MinIO: ${e.message}")
+                throw IOException("Error during upload to MinIO: ${e.message}", e)
             }
         }
 
@@ -34,9 +43,14 @@ class FileRepository(private val minioClient: MinioClient) {
     @Throws(MinioException::class, IOException::class)
     fun downloadFile(objectName: String): InputStream {
         try {
-            return minioClient.getObject(bucketName, objectName)
+            return minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .build()
+            )
         } catch (e: MinioException) {
-            throw MinioException("Error during fetch from MinIO: ${e.message}")
+            throw IOException("Error during fetch from MinIO: ${e.message}", e)
         }
     }
 }

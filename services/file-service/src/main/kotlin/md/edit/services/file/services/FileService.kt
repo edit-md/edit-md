@@ -1,11 +1,13 @@
 package md.edit.services.file.service
 
-import md.edit.services.file.repository.FileRepository
+import md.edit.services.file.repos.FileRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
+import java.io.InputStream
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
+import io.minio.errors.MinioException
 
 @Service
 class FileService(private val fileRepository: FileRepository) {

@@ -156,7 +156,6 @@ services:
         networks:
             - nginx-net
             - file-service-net
-            - account-service-access
         develop:
             watch:
                 - path: ./services/file-service/src  # Watch for changes in the source folder
