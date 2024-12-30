@@ -150,6 +150,11 @@ services:
             - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
             - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
             - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
+            - EDITMD_DOMAIN=${EDITMD_DOMAIN}
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_DOCUMENT_SERVICE_HOST=http://document-service:8080
+            - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
         depends_on:
             - minio
             - file-db
