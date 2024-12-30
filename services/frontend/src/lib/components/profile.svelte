@@ -33,7 +33,7 @@
 		<DropdownMenu.Item
 			class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
 			href="/account"
-		>	
+		>
 			<div class="flex items-center">Account</div>
 		</DropdownMenu.Item>
 		<DropdownMenu.Item

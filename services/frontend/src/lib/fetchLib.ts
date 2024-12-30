@@ -21,10 +21,10 @@ export async function fetchProxy(
 	options: RequestInit = {}
 ): Promise<Response> {
 	// Extract the session cookie from req.cookies
-    let sessionCookieName = env.EDITMD_SESSION_COOKIE;
+	let sessionCookieName = env.EDITMD_SESSION_COOKIE;
 	const editmdSessionCookie = req.cookies.get(sessionCookieName);
 
-	if(editmdSessionCookie === undefined) {
+	if (editmdSessionCookie === undefined) {
 		throw new SessionError(sessionCookieName + ' cookie not found');
 	}
 
@@ -47,7 +47,7 @@ export async function fetchProxy(
 	// if unauthorized, remove the session cookie
 	if (resp.status === 401) {
 		req.cookies.delete(sessionCookieName, {
-			path: '/',
+			path: '/'
 		});
 		throw new SessionError('Unauthorized');
 	}

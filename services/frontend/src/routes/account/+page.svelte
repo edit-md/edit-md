@@ -29,13 +29,13 @@
 				></div>
 				<div>
 					<h2 class="text-xl font-bold">{user.name}</h2>
-					<p class="text-foreground-60 text-sm">{user.email}</p>
+					<p class="text-sm text-foreground-60">{user.email}</p>
 
 					<div class="mt-2 flex gap-2">
 						{#each user.connectedAccounts as acc}
 							{#if acc.provider === 'github'}
 								<a href={acc.user?.html_url ?? ''} target="_blank">
-									<IconGithub class="text-foreground h-6 w-6"></IconGithub>
+									<IconGithub class="h-6 w-6 text-foreground"></IconGithub>
 								</a>
 							{/if}
 						{/each}
@@ -43,15 +43,21 @@
 				</div>
 			</div>
 			{#if dev}
-				<div class="bg-foreground-10 p-4 rounded-md">
+				<div class="rounded-md bg-foreground-10 p-4">
 					<h2 class="text-xl font-bold">Development</h2>
-                    <p class="text-foreground-80 mb-2 text-sm">The information below is only visible during development mode. This can be useful for debugging purposes and understanding the current state of the application.</p>
+					<p class="mb-2 text-sm text-foreground-80">
+						The information below is only visible during development mode. This can be useful for
+						debugging purposes and understanding the current state of the application.
+					</p>
 
-                    <h3 class="text-lg">User Info:</h3>
+					<h3 class="text-lg">User Info:</h3>
 					<DebugArea value={user} class="mb-2 text-sm"></DebugArea>
 
-                    <h3 class="text-lg ">API Request Headers:</h3>
-					<DebugArea value={`Cookie: EDITMD_SESSION=${data.sessionCookie}\nX-CSRF-PROTECTION: 1`} class="text-sm"></DebugArea>
+					<h3 class="text-lg">API Request Headers:</h3>
+					<DebugArea
+						value={`Cookie: EDITMD_SESSION=${data.sessionCookie}\nX-CSRF-PROTECTION: 1`}
+						class="text-sm"
+					></DebugArea>
 				</div>
 			{/if}
 		</div>
