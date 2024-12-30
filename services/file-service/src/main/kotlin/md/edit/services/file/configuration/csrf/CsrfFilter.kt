@@ -1,4 +1,4 @@
-package md.edit.services.document.configuration.csrf
+package md.edit.services.file.configuration.csrf
 
 import jakarta.servlet.*
 import jakarta.servlet.http.HttpServletRequest

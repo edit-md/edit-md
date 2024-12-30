@@ -1,4 +1,4 @@
-package md.edit.services.document.configuration.cookieauth
+package md.edit.services.file.configuration.cookieauth
 
 import java.util.*
 

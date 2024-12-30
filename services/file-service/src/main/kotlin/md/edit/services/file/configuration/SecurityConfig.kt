@@ -1,8 +1,8 @@
-package md.edit.services.document.configuration
+package md.edit.services.file.configuration
 
-import md.edit.services.document.configuration.apikeyauth.ApiKeyAuthenticationFilter
-import md.edit.services.document.configuration.cookieauth.CookieAuthenticationFilter
-import md.edit.services.document.configuration.csrf.CsrfFilter
+import md.edit.services.file.configuration.apikeyauth.ApiKeyAuthenticationFilter
+import md.edit.services.file.configuration.cookieauth.CookieAuthenticationFilter
+import md.edit.services.file.configuration.csrf.CsrfFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

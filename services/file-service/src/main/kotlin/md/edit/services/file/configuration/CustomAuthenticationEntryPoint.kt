@@ -1,4 +1,4 @@
-package md.edit.services.document.configuration
+package md.edit.services.file.configuration
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

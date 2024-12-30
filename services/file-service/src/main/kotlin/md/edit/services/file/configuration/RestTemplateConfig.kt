@@ -1,4 +1,4 @@
-package md.edit.services.document.configuration
+package md.edit.services.file.configuration
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
