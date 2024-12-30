@@ -23,7 +23,7 @@ class FileController(private val fileService: FileService) {
     @Throws(IOException::class)
     fun downloadFile(@PathVariable fileName: String): ResponseEntity<ByteArray> {
         val inputStream = fileService.downloadFile(fileName)
-        val content = inputStream.readBytes()
+        val content = inputStream.readAllBytes()
         return ResponseEntity.ok(content)
     }
 }

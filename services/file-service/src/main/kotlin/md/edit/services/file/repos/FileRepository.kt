@@ -22,19 +22,20 @@ class FileRepository(private val minioClient: MinioClient) {
     fun uploadFile(file: MultipartFile): String {
         val objectName = file.originalFilename ?: throw IOException("Filename is null")
 
-        file.inputStream.use { inputStream ->
-            try {
-                minioClient.putObject(
-                    PutObjectArgs.builder()
-                        .bucket(bucketName)
-                        .`object`(objectName)
-                        .stream(inputStream, file.size, -1)
-                        .contentType(file.contentType ?: "application/octet-stream")
-                        .build()
-                )
-            } catch (e: MinioException) {
-                throw IOException("Error during upload to MinIO: ${e.message}", e)
-            }
+        val inputStream = file.inputStream
+        try {
+            minioClient.putObject(
+                PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .stream(inputStream, file.size, -1)
+                    .contentType(file.contentType ?: "application/octet-stream")
+                    .build()
+            )
+        } catch (e: MinioException) {
+            throw IOException("Error during upload to MinIO: ${e.message}", e)
+        } finally {
+            inputStream.close()
         }
 
         return objectName

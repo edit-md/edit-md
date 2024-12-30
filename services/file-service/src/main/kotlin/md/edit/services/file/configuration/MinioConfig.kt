@@ -11,7 +11,7 @@ import io.minio.MakeBucketArgs
 @Configuration
 class MinioConfig {
 
-    @Value("\${minio.endpoint}")
+    @Value("\${minio.url}")
     lateinit var endpoint: String
 
     @Value("\${minio.access-key}")
