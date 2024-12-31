@@ -1,7 +1,7 @@
 package md.edit.services.document.controllers
 
 import md.edit.services.document.dtos.DocumentDTO
-import md.edit.services.document.dtos.toDocumentDTO
+import md.edit.services.document.dtos.toDTO
 import md.edit.services.document.services.DocumentService
 import md.edit.services.document.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
@@ -25,7 +25,7 @@ class DocumentController(
         val user = AuthorizationUtils.onlyUser(authentication)
 
         val documents = documentService.getDocumentsOfUser(user)
-        val documentDTOs = documents.map { it.toDocumentDTO() }.toMutableList()
+        val documentDTOs = documents.map { it.toDTO() }.toMutableList()
         return ResponseEntity.ok(documentDTOs)
     }
 
@@ -34,7 +34,7 @@ class DocumentController(
         val user = AuthorizationUtils.onlyUser(authentication)
 
         val documents = documentService.getSharedDocumentsOfUser(user)
-        val documentDTOs = documents.map { it.toDocumentDTO() }.toMutableList()
+        val documentDTOs = documents.map { it.toDTO() }.toMutableList()
         return ResponseEntity.ok(documentDTOs)
     }
 
@@ -43,29 +43,27 @@ class DocumentController(
         val user = AuthorizationUtils.onlyUser(authentication)
 
         val documents = documentService.getOwnedDocumentsOfUser(user)
-        val documentDTOs = documents.map { it.toDocumentDTO() }.toMutableList()
+        val documentDTOs = documents.map { it.toDTO() }.toMutableList()
         return ResponseEntity.ok(documentDTOs)
     }
 
     @GetMapping("/{id}")
-    fun getDocument(authentication: Authentication, @PathVariable id: String): ResponseEntity<DocumentDTO> {
-        val uuid = runCatching { UUID.fromString(id) }.getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST) }
-        val document = documentService.getDocumentById(uuid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    fun getDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
+        val document = documentService.getDocumentById(id) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
         // if the request is from an API key, return the document
         if (AuthorizationUtils.isAPI(authentication) != null) {
-            return ResponseEntity.ok(document.toDocumentDTO(withShared = true))
+            return ResponseEntity.ok(document.toDTO(withShared = true))
         }
 
         // if the request is from the owner of the document, return the document
         AuthorizationUtils.onlyUsers(authentication, listOf(document.owner.toString()))
-        return ResponseEntity.ok(document.toDocumentDTO(withShared = true))
+        return ResponseEntity.ok(document.toDTO(withShared = true))
     }
 
     @DeleteMapping("/{id}")
-    fun deleteDocument(authentication: Authentication, @PathVariable id: String): ResponseEntity<Unit> {
-        val uuid = runCatching { UUID.fromString(id) }.getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST) }
-        val document = documentService.getDocumentById(uuid) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    fun deleteDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<Unit> {
+        val document = documentService.getDocumentById(id) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
         // if the request is from an API key, delete the document
         if (AuthorizationUtils.isAPI(authentication) != null) {
@@ -83,7 +81,7 @@ class DocumentController(
     fun createDocument(authentication: Authentication): ResponseEntity<DocumentDTO> {
         // ToDo: Use a DTO for the input data
         val user = AuthorizationUtils.onlyUser(authentication)
-        return ResponseEntity.ok(documentService.createDocument(user).toDocumentDTO(withShared = true))
+        return ResponseEntity.ok(documentService.createDocument(user).toDTO(withShared = true))
     }
 }
 

@@ -21,11 +21,11 @@ class DocumentDTO(document: Document) {
     var shared: MutableList<DocumentUserDTO>? = null
 }
 
-fun Document.toDocumentDTO(withShared: Boolean = false): DocumentDTO {
+fun Document.toDTO(withShared: Boolean = false): DocumentDTO {
     val documentDto = DocumentDTO(this)
 
-    if(withShared) {
-        documentDto.shared = this.documentUsers.map { it.toDocumentUserDTO() }.toMutableList()
+    if (withShared) {
+        documentDto.shared = this.documentUsers.map { it.toDTO() }.toMutableList()
     }
 
     return documentDto

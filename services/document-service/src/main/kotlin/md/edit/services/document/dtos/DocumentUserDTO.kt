@@ -12,7 +12,7 @@ class DocumentUserDTO(documentUser: DocumentUser) {
 
 }
 
-fun DocumentUser.toDocumentUserDTO(): DocumentUserDTO {
+fun DocumentUser.toDTO(): DocumentUserDTO {
     val documentUserDTO = DocumentUserDTO(this)
     return documentUserDTO
 }
