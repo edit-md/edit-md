@@ -11,14 +11,10 @@ data class Document(
     var id: UUID? = null,
 
     var title: String,
-    var content: String,
 
     var owner: UUID,
 
     var visibility: DocumentVisibility = DocumentVisibility.PRIVATE,
-
-    @Temporal(TemporalType.TIMESTAMP)
-    var lastModified: Date = Date(),
 
     @Temporal(TemporalType.TIMESTAMP)
     var created: Date = Date(),
@@ -29,16 +25,10 @@ data class Document(
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
-    var documentUsers: MutableSet<DocumentUser> = mutableSetOf()
+    var documentUsers: MutableSet<DocumentUser> = mutableSetOf(),
+
+    @OneToOne(mappedBy = "document", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    var data: DocumentData? = null
 ) {
-    constructor(title: String, content: String, owner: UUID) : this(null, title, content, owner)
-
-    // Helper method for bidirectional relationship
-    fun addDocumentUser(documentUser: DocumentUser) {
-        documentUsers.add(documentUser)
-
-        if (documentUser.document != this) {  // Prevent infinite recursion
-            documentUser.document = this
-        }
-    }
+    constructor(title: String, owner: UUID) : this(null, title, owner)
 }

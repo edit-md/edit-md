@@ -9,12 +9,12 @@ class DocumentDTO(document: Document) {
     val id: UUID? = document.id
 
     val title: String = document.title
-    val content: String = document.content
+    val content: String = document.data!!.content
 
     val owner: UUID = document.owner
     val visibility: DocumentVisibility = document.visibility
 
-    val lastModified: Date = document.lastModified
+    val lastModified: Date = document.data!!.lastModified
     val created: Date = document.created
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

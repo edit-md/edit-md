@@ -10,7 +10,7 @@ data class DocumentUser(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", insertable = false, updatable = false)
-    var document: Document? = null,
+    var document: Document,
 
     var permission: DocumentPermission
 ) {

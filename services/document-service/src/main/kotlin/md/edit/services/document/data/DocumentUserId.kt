@@ -8,8 +8,10 @@ import java.util.*
 @Embeddable
 data class DocumentUserId(
     @Column(name = "document_id")
-    var documentId: UUID,
+    var documentId: UUID?,
 
     @Column(name = "user_id")
     var userId: UUID
-) : Serializable
+) : Serializable {
+    constructor(document: Document, userId: UUID) : this(document.id, userId)
+}

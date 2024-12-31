@@ -1,10 +1,7 @@
 package md.edit.services.document.services
 
 import md.edit.services.document.configuration.cookieauth.CustomUserDetails
-import md.edit.services.document.data.Document
-import md.edit.services.document.data.DocumentPermission
-import md.edit.services.document.data.DocumentUser
-import md.edit.services.document.data.DocumentUserId
+import md.edit.services.document.data.*
 import md.edit.services.document.repos.DocumentRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,18 +21,21 @@ class DocumentService(
     @Transactional
     fun createDocument(user: CustomUserDetails): Document {
         // ToDo: Use correct data
-        var document = Document("test", "content", user.id)
-        document = documentRepository.save(document);
+        var document = Document("test", user.id)
+        val documentData = DocumentData(document, "")
+        document.data = documentData
+
+        document = documentRepository.save(document)
 
         val user1Id = UUID.randomUUID()
         val user2Id = UUID.randomUUID()
-        val user1 = DocumentUser(DocumentUserId(document.id!!, user1Id), permission = DocumentPermission.READ)
-        val user2 = DocumentUser(DocumentUserId(document.id!!, user2Id), permission = DocumentPermission.WRITE)
+        val user1 = DocumentUser(DocumentUserId(document, user1Id), document, permission = DocumentPermission.READ)
+        val user2 = DocumentUser(DocumentUserId(document, user2Id), document, permission = DocumentPermission.WRITE)
 
-        document.addDocumentUser(user1)
-        document.addDocumentUser(user2)
+        document.documentUsers.add(user1)
+        document.documentUsers.add(user2)
 
-        return documentRepository.save(document);
+        return documentRepository.save(document)
     }
 
     @Transactional
@@ -46,6 +46,11 @@ class DocumentService(
         owned.addAll(shared)
 
         return owned
+    }
+
+    @Transactional
+    fun deleteDocument(document: Document) {
+        documentRepository.delete(document)
     }
 
     @Transactional
