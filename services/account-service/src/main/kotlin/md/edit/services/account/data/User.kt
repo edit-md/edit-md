@@ -1,6 +1,7 @@
 package md.edit.services.account.data
 
 import jakarta.persistence.*
+import md.edit.services.account.data.usersettings.UserSettings
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.util.*
@@ -19,6 +20,7 @@ data class User(
     var avatar: String? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     var settings: UserSettings = UserSettings(),
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)

@@ -2,7 +2,7 @@ package md.edit.services.account.dtos
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import md.edit.services.account.data.User
-import md.edit.services.account.data.UserSettings
+import md.edit.services.account.data.usersettings.UserSettings
 import java.util.*
 
 class UserDTO private constructor(user: User) {

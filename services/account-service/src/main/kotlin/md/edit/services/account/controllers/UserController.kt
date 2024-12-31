@@ -1,7 +1,7 @@
 package md.edit.services.account.controllers
 
 import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
-import md.edit.services.account.data.UserSettings
+import md.edit.services.account.data.usersettings.UserSettings
 import md.edit.services.account.dtos.UserDTO
 import md.edit.services.account.services.UserService
 import md.edit.services.account.utils.AuthorizationUtils

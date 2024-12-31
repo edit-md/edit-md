@@ -5,7 +5,7 @@ import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
-import md.edit.services.account.data.UserSettings
+import md.edit.services.account.data.usersettings.UserSettings
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
 import org.springframework.stereotype.Service
