@@ -6,7 +6,6 @@ import io.minio.GetObjectArgs
 import io.minio.GetPresignedObjectUrlArgs
 import io.minio.errors.MinioException
 import io.minio.http.Method
-import md.edit.services.file.data.File
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Repository
 import org.springframework.web.multipart.MultipartFile
@@ -44,12 +43,12 @@ class FileRepository(private val minioClient: MinioClient) {
     }
 
     @Throws(MinioException::class, IOException::class)
-    fun downloadFile(objectName: String): InputStream {
+    fun downloadFile(filePath: String): InputStream {
         try {
             return minioClient.getObject(
                 GetObjectArgs.builder()
                     .bucket(bucketName)
-                    .`object`(objectName)
+                    .`object`(filePath)
                     .build()
             )
         } catch (e: MinioException) {
@@ -58,12 +57,12 @@ class FileRepository(private val minioClient: MinioClient) {
     }
 
     @Throws(MinioException::class, IOException::class)
-    fun generatePresidedDownloadUrl(file: File): String {
+    fun generatePresidedDownloadUrl(filePath: String): String {
         try {
             return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                     .bucket(bucketName)
-                    .`object`(file.path)
+                    .`object`(filePath)
                     .method(Method.GET)
                     .expiry(1, TimeUnit.MINUTES)
                     .build()

@@ -24,7 +24,6 @@ class FileService(private val fileRepository: FileRepository,
         fileRepository.uploadFile(file, path)
 
         val metadata = File(
-            id = UUID.randomUUID(), // Needs to be changed
             documentId = documentId,
             path = path,
             createdDate = LocalDateTime.now(),
@@ -43,6 +42,6 @@ class FileService(private val fileRepository: FileRepository,
     fun generatePresidedDownloadUrl(fileId: UUID): String {
         val file = metadataRepository.findById(fileId)
             .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
-        return fileRepository.generatePresidedDownloadUrl(file)
+        return fileRepository.generatePresidedDownloadUrl(file.path)
     }
 }

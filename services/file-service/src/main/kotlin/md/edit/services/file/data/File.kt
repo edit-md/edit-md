@@ -20,4 +20,17 @@ data class File(
 
     @Column(name = "created_date", nullable = false)
     val createdDate: java.time.LocalDateTime
-)
+) {
+    constructor(
+        documentId: UUID,
+        path: String,
+        type: String,
+        createdDate: java.time.LocalDateTime
+    ) : this(
+        id = UUID.randomUUID(),
+        documentId = documentId,
+        path = path,
+        type = type,
+        createdDate = createdDate
+    )
+}
