@@ -10,9 +10,9 @@ class DocumentUserDTO(documentUser: DocumentUser) {
 
     val permission = documentUser.permission
 
-    companion object {
-        fun from(documentUser: DocumentUser): DocumentUserDTO {
-            return DocumentUserDTO(documentUser)
-        }
-    }
+}
+
+fun DocumentUser.toDocumentUserDTO(): DocumentUserDTO {
+    val documentUserDTO = DocumentUserDTO(this)
+    return documentUserDTO
 }

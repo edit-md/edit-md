@@ -19,18 +19,14 @@ class DocumentDTO(document: Document) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     var shared: MutableList<DocumentUserDTO>? = null
-        private set
+}
 
-    companion object {
-        fun from(document: Document): DocumentDTO {
-            val documentDto = DocumentDTO(document)
-            return documentDto
-        }
+fun Document.toDocumentDTO(withShared: Boolean = false): DocumentDTO {
+    val documentDto = DocumentDTO(this)
 
-        fun fromDocumentWithShared(document: Document): DocumentDTO {
-            val documentDto = DocumentDTO(document)
-            documentDto.shared = document.documentUsers.map { DocumentUserDTO.from(it) }.toMutableList()
-            return documentDto
-        }
+    if(withShared) {
+        documentDto.shared = this.documentUsers.map { it.toDocumentUserDTO() }.toMutableList()
     }
+
+    return documentDto
 }

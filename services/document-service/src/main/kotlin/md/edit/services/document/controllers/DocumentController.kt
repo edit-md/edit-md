@@ -1,6 +1,7 @@
 package md.edit.services.document.controllers
 
 import md.edit.services.document.dtos.DocumentDTO
+import md.edit.services.document.dtos.toDocumentDTO
 import md.edit.services.document.services.DocumentService
 import md.edit.services.document.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
@@ -24,7 +25,7 @@ class DocumentController(
         val user = AuthorizationUtils.onlyUser(authentication)
 
         val documents = documentService.getDocumentsOfUser(user)
-        val documentDTOs = documents.map { DocumentDTO.from(it) }.toMutableList()
+        val documentDTOs = documents.map { it.toDocumentDTO() }.toMutableList()
         return ResponseEntity.ok(documentDTOs)
     }
 
@@ -33,7 +34,7 @@ class DocumentController(
         val user = AuthorizationUtils.onlyUser(authentication)
 
         val documents = documentService.getSharedDocumentsOfUser(user)
-        val documentDTOs = documents.map { DocumentDTO.from(it) }.toMutableList()
+        val documentDTOs = documents.map { it.toDocumentDTO() }.toMutableList()
         return ResponseEntity.ok(documentDTOs)
     }
 
@@ -42,7 +43,7 @@ class DocumentController(
         val user = AuthorizationUtils.onlyUser(authentication)
 
         val documents = documentService.getOwnedDocumentsOfUser(user)
-        val documentDTOs = documents.map { DocumentDTO.from(it) }.toMutableList()
+        val documentDTOs = documents.map { it.toDocumentDTO() }.toMutableList()
         return ResponseEntity.ok(documentDTOs)
     }
 
@@ -53,12 +54,12 @@ class DocumentController(
 
         // if the request is from an API key, return the document
         if (AuthorizationUtils.isAPI(authentication) != null) {
-            return ResponseEntity.ok(DocumentDTO.fromDocumentWithShared(document))
+            return ResponseEntity.ok(document.toDocumentDTO(withShared = true))
         }
 
         // if the request is from the owner of the document, return the document
         AuthorizationUtils.onlyUsers(authentication, listOf(document.owner.toString()))
-        return ResponseEntity.ok(DocumentDTO.fromDocumentWithShared(document))
+        return ResponseEntity.ok(document.toDocumentDTO(withShared = true))
     }
 
     @DeleteMapping("/{id}")
@@ -82,6 +83,8 @@ class DocumentController(
     fun createDocument(authentication: Authentication): ResponseEntity<DocumentDTO> {
         // ToDo: Use a DTO for the input data
         val user = AuthorizationUtils.onlyUser(authentication)
-        return ResponseEntity.ok(DocumentDTO.from(documentService.createDocument(user)))
+        return ResponseEntity.ok(documentService.createDocument(user).toDocumentDTO(withShared = true))
     }
 }
+
+
