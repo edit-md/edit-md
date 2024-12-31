@@ -1,9 +1,9 @@
 CREATE TABLE files (
-    Id UUID PRIMARY KEY,
-    DocumentId UUID NOT NULL,
+    id UUID PRIMARY KEY,
+    document_id UUID NOT NULL,
     Path TEXT NOT NULL,
     Type VARCHAR(50) NOT NULL,
-    CreatedDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_document_id ON files USING BTREE (DocumentId);
+CREATE INDEX idx_document_id ON files USING BTREE (document_id);
