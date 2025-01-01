@@ -5,7 +5,6 @@ import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
-import md.edit.services.account.data.usersettings.UserSettings
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
 import org.springframework.stereotype.Service
@@ -24,7 +23,7 @@ class UserService(
      * @return User
      */
     @Transactional
-    fun getAndUpdateOrCreateUser(request: CustomOAuth2UserRequest): User {
+    fun createOrUpdateAndGetUser(request: CustomOAuth2UserRequest): User {
         var user = getUser(request)
 
         if (user == null) {
@@ -84,13 +83,7 @@ class UserService(
     }
 
     @Transactional
-    fun getUserSettingsByUserId(id: UUID): UserSettings? {
-        return getUserById(id)?.settings
-    }
-
-    @Transactional
     fun updateUser(user: User) {
-        userRepository.save(user)
+        println("\n Jetzt wird persistiert" + userRepository.save(user))
     }
-
 }

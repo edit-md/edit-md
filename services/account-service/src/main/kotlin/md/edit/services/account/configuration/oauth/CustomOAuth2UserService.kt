@@ -31,6 +31,6 @@ class CustomOAuth2UserService(
             userRequest.email = gitHubService.getPrimaryEmail(originalUserRequest.accessToken.tokenValue)
         }
 
-        return CustomOAuth2User(userService.getAndUpdateOrCreateUser(userRequest), oauth2User)
+        return CustomOAuth2User(userService.createOrUpdateAndGetUser(userRequest), oauth2User)
     }
 }

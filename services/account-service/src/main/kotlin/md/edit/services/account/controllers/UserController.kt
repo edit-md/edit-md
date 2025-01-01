@@ -1,7 +1,9 @@
 package md.edit.services.account.controllers
 
 import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
-import md.edit.services.account.data.usersettings.UserSettings
+import md.edit.services.account.data.Header
+import md.edit.services.account.data.Theme
+import md.edit.services.account.data.UserSettings
 import md.edit.services.account.dtos.UserDTO
 import md.edit.services.account.dtos.toDTO
 import md.edit.services.account.services.UserService
@@ -11,10 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
@@ -46,27 +45,47 @@ class UserController(private val userService: UserService) {
     fun getMe(authentication: Authentication): ResponseEntity<UserDTO> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
-        return ResponseEntity.ok(
-            userService.getUser(user)?.toDTO(
-                withConnectedAccounts = true,
-                withSettings = true,
-                withEmail = true
-            )
-                ?: throw RuntimeException("User not found")
-        )
+        return ResponseEntity.ok(userService.getUser(user)?.toDTO() ?: throw RuntimeException("User not found"))
     }
 
     @GetMapping("me/settings")
     fun getUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
-        return ResponseEntity.ok(userService.getUserSettingsByUserId(user.id))
+        return ResponseEntity.ok(userService.getUser(user)?.toDTO()?.settings)
+    }
+
+    @PatchMapping("me")
+    fun updateUser(authentication: Authentication): ResponseEntity<UserDTO> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
+        // PATCH
+        val oldUser = userService.getUser(user)
+
+        oldUser?.name = "Dummy_User"
+        oldUser?.email = "dummy_user@example.com"
+        oldUser?.avatar = "keinBild_LOOOL"
+
+        oldUser?.settings = UserSettings(Theme.LIGHT, Header.WIDE)
+        userService.updateUser(oldUser!!)
+
+        // GET/RETURN
+        return ResponseEntity.ok(getMe(authentication).body)
     }
 
     @PatchMapping("me/settings")
-    fun updateUserSettings(authentication: Authentication) {
+    fun updateUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
-        userService.updateUser(userService.getUser(user)!!)
+        // PATCH
+        val oldUser = userService.getUser(user)
+
+        oldUser?.settings = UserSettings(Theme.LIGHT, Header.WIDE)
+        userService.updateUser(oldUser!!)
+
+        // GET/RETURN
+        //lazy af
+        //return ResponseEntity.ok(getUserSettings(authentication).body)
+        return ResponseEntity.ok(getMe(authentication).body?.settings)
     }
 }

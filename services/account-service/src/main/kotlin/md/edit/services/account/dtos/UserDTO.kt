@@ -2,7 +2,7 @@ package md.edit.services.account.dtos
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import md.edit.services.account.data.User
-import md.edit.services.account.data.usersettings.UserSettings
+import md.edit.services.account.data.UserSettings
 import java.util.*
 
 class UserDTO(user: User) {
@@ -23,6 +23,12 @@ class UserDTO(user: User) {
 
 }
 
+//all options
+fun User.toDTO(): UserDTO {
+    return this.toDTO(withConnectedAccounts = true, withSettings = true, withEmail = true)
+}
+
+//choose what options you want
 fun User.toDTO(withConnectedAccounts: Boolean = false, withSettings: Boolean = false, withEmail: Boolean = false): UserDTO {
     val userDto = UserDTO(this)
 
