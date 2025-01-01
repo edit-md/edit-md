@@ -30,5 +30,10 @@ data class Document(
     @OneToOne(mappedBy = "document", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     var data: DocumentData? = null
 ) {
-    constructor(title: String, owner: UUID) : this(null, title, owner)
+    constructor(title: String, owner: UUID, visibility: DocumentVisibility) : this(null, title, owner, visibility)
+}
+
+enum class DocumentVisibility {
+    PUBLIC,
+    PRIVATE
 }

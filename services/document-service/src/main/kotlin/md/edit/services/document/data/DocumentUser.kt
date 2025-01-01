@@ -24,3 +24,8 @@ data class DocumentUser(
         return id.hashCode()
     }
 }
+
+enum class DocumentPermission {
+    READ,
+    WRITE
+}

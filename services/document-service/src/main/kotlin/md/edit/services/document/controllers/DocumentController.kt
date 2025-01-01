@@ -1,18 +1,10 @@
 package md.edit.services.document.controllers
 
-import md.edit.services.document.dtos.DocumentDTO
-import md.edit.services.document.dtos.toDTO
+import md.edit.services.document.dtos.*
 import md.edit.services.document.services.DocumentService
-import md.edit.services.document.utils.AuthorizationUtils
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -22,66 +14,72 @@ class DocumentController(
     @GetMapping("/")
     fun getDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
         // ToDo: Add Pagination
-        val user = AuthorizationUtils.onlyUser(authentication)
+        val documents = documentService.getDocuments(authentication)
+        return ResponseEntity.ok(documents.map { it.toDTO() }.toList())
+    }
 
-        val documents = documentService.getDocumentsOfUser(user)
-        val documentDTOs = documents.map { it.toDTO() }.toMutableList()
-        return ResponseEntity.ok(documentDTOs)
+    @PostMapping("/")
+    fun createDocument(authentication: Authentication, @RequestBody data: DocumentInDTO): ResponseEntity<DocumentDTO> {
+        val document = documentService.createDocument(
+            authentication,
+            data.title,
+            data.visibility,
+            data.shared?.associate { it.userId to it.permission })
+
+        return ResponseEntity.ok(document.toDTO(withShared = true))
     }
 
     @GetMapping("/shared")
     fun getSharedDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
-        val user = AuthorizationUtils.onlyUser(authentication)
-
-        val documents = documentService.getSharedDocumentsOfUser(user)
-        val documentDTOs = documents.map { it.toDTO() }.toMutableList()
-        return ResponseEntity.ok(documentDTOs)
+        val documents = documentService.getSharedDocuments(authentication)
+        return ResponseEntity.ok(documents.map { it.toDTO() }.toList())
     }
 
     @GetMapping("/owned")
     fun getOwnedDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
-        val user = AuthorizationUtils.onlyUser(authentication)
-
-        val documents = documentService.getOwnedDocumentsOfUser(user)
-        val documentDTOs = documents.map { it.toDTO() }.toMutableList()
-        return ResponseEntity.ok(documentDTOs)
+        val documents = documentService.getOwnedDocuments(authentication)
+        return ResponseEntity.ok(documents.map { it.toDTO() }.toList())
     }
 
     @GetMapping("/{id}")
     fun getDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
-        val document = documentService.getDocumentById(id) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-
-        // if the request is from an API key, return the document
-        if (AuthorizationUtils.isAPI(authentication) != null) {
-            return ResponseEntity.ok(document.toDTO(withShared = true))
-        }
-
-        // if the request is from the owner of the document, return the document
-        AuthorizationUtils.onlyUsers(authentication, listOf(document.owner.toString()))
+        val document = documentService.getDocumentById(authentication, id)
         return ResponseEntity.ok(document.toDTO(withShared = true))
     }
 
     @DeleteMapping("/{id}")
     fun deleteDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<Unit> {
-        val document = documentService.getDocumentById(id) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-
-        // if the request is from an API key, delete the document
-        if (AuthorizationUtils.isAPI(authentication) != null) {
-            documentService.deleteDocument(document)
-            return ResponseEntity.ok().build()
-        }
-
-        AuthorizationUtils.onlyUser(authentication, document.owner.toString())
-
-        documentService.deleteDocument(document)
+        documentService.deleteDocument(authentication, id)
         return ResponseEntity.ok().build()
     }
 
-    @PostMapping("/")
-    fun createDocument(authentication: Authentication): ResponseEntity<DocumentDTO> {
-        // ToDo: Use a DTO for the input data
-        val user = AuthorizationUtils.onlyUser(authentication)
-        return ResponseEntity.ok(documentService.createDocument(user).toDTO(withShared = true))
+    @GetMapping("/{id}/share")
+    fun getSharedUsers(
+        authentication: Authentication,
+        @PathVariable id: UUID
+    ): ResponseEntity<Collection<DocumentUserDTO>> {
+        val sharedUsers = documentService.getSharedUsers(authentication, id)
+        return ResponseEntity.ok(sharedUsers.map { it.toDTO() }.toList())
+    }
+
+    @PutMapping("/{id}/share")
+    fun shareDocument(
+        authentication: Authentication,
+        @PathVariable id: UUID,
+        @RequestBody data: DocumentUserInDTO
+    ): ResponseEntity<DocumentUserDTO> {
+        val addedUser = documentService.addSharedUser(authentication, id, data.userId, data.permission)
+        return ResponseEntity.ok(addedUser.toDTO())
+    }
+
+    @DeleteMapping("/{id}/share/{userId}")
+    fun unshareDocument(
+        authentication: Authentication,
+        @PathVariable id: UUID,
+        @PathVariable userId: UUID
+    ): ResponseEntity<Unit> {
+        documentService.removeSharedUser(authentication, id, userId)
+        return ResponseEntity.ok().build()
     }
 }
 
