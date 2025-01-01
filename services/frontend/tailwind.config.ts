@@ -34,6 +34,9 @@ export default {
 					'04': 'hsl(var(--foreground)/0.04)'
 				}
 			},
+			height: {
+				"input": "var(--input-height)"
+			},
 			boxShadow: {
 				mini: 'var(--shadow-mini)',
 				'mini-inset': 'var(--shadow-mini-inset)',

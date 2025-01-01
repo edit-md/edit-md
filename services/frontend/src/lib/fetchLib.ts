@@ -20,6 +20,10 @@ export async function fetchProxy(
 	url: string,
 	options: RequestInit = {}
 ): Promise<Response> {
+	if(!req.cookies) {
+		throw new SessionError('Cookies not found in request');
+	}
+
 	// Extract the session cookie from req.cookies
 	let sessionCookieName = env.EDITMD_SESSION_COOKIE;
 	const editmdSessionCookie = req.cookies.get(sessionCookieName);

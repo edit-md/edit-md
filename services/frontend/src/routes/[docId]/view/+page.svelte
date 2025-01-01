@@ -9,22 +9,10 @@
 	let loggedIn = $state(data.user !== undefined);
 	let user = $state(data.user);
 
-	// generate long text
-	let text = $state('');
-
-	for (let i = 0; i < 1000; i++) {
-		if (i % 2 == 0) {
-			text += '**';
-		}
-
-		text += 'Hello world!';
-
-		if (i % 2 == 0) {
-			text += '** ';
-		} else {
-			text += ' ';
-		}
-	}
+	let documentState = $state({
+		title: data.document?.title || 'Untitled' ,
+		content: data.document?.content || ''
+	});
 
 	function editDocument() {
 		goto('./');
@@ -34,13 +22,13 @@
 <div class="pageContainer bg-background">
 	<Header {user}>
 		{#snippet center()}
-			<h1 class="pageTitle">View Document {page.params.docId}</h1>
+			<h1 class="pageTitle">{documentState.title}</h1>
 		{/snippet}
 		{#snippet right()}
 			<button class="rounded-md bg-foreground-10 px-4 py-1" onclick={editDocument}>Edit</button>
 		{/snippet}
 	</Header>
-	<MarkdownViewer content={text} class=""></MarkdownViewer>
+	<MarkdownViewer content={documentState.content}></MarkdownViewer>
 </div>
 
 <style>

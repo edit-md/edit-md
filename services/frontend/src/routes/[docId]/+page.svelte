@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 
 	import Editor from '$lib/components/editor.svelte';
+	import { onMount } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -13,7 +14,8 @@
 	let user = $state(data.user);
 
 	let documentState = $state({
-		content: 'demo'
+		title: data.document?.title || 'Untitled',
+		content: data.document?.content || ''
 	});
 
 	let viewState = $state({
@@ -25,12 +27,16 @@
 	function viewDocument() {
 		goto(page.url.href + '/view');
 	}
+
+	onMount(() => {
+		console.log(data.document);
+	})
 </script>
 
 <div class="pageContainer bg-background">
 	<Header {user} fullWidth={true}>
 		{#snippet center()}
-			<h1 class="pageTitle">Document {page.params.docId}</h1>
+			<h1 class="pageTitle">{documentState.title}</h1>
 		{/snippet}
 		{#snippet right()}
 			<button class="rounded-md bg-foreground-10 px-4 py-1" onclick={viewDocument}>View</button>
