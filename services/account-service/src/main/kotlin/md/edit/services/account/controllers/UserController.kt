@@ -44,18 +44,20 @@ class UserController(private val userService: UserService) {
     fun getMe(authentication: Authentication): ResponseEntity<UserDTO> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
-        return ResponseEntity.ok(userService.getUser(user)?.toDTO() ?: throw RuntimeException("User not found"))
+        return ResponseEntity.ok(
+            userService.getUser(user)?.toDTO(
+                withConnectedAccounts = true,
+                withSettings = true,
+                withEmail = true
+            ) ?: throw RuntimeException("User not found")
+        )
     }
 
     @GetMapping("me/settings")
     fun getUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
-        return ResponseEntity.ok(userService.getUser(user)?.toDTO(
-            withConnectedAccounts = false,
-            withSettings = true,
-            withEmail = false
-        )?.settings)
+        return ResponseEntity.ok(userService.getUser(user)?.settings)
     }
 
     @PatchMapping("me/settings")
@@ -64,13 +66,10 @@ class UserController(private val userService: UserService) {
 
         // PATCH
         val oldUser = userService.getUser(user)
-
         oldUser?.settings = UserSettings(Theme.LIGHT, Header.WIDE)
         userService.updateUser(oldUser!!)
 
         // GET/RETURN
-        //lazy af
-        //return ResponseEntity.ok(getUserSettings(authentication).body)
         return ResponseEntity.ok(getMe(authentication).body?.settings)
     }
 }
