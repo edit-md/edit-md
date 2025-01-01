@@ -82,8 +82,11 @@ class UserService(
         return userRepository.findById(id).map { it }.orElse(null)
     }
 
+    // ToDo: This method should be removed.
     @Transactional
-    fun updateUser(user: User) {
-        println("\n Jetzt wird persistiert" + userRepository.save(user))
+    fun updateUser(user: User): User {
+        return userRepository.save(user)
     }
+
+    // ToDo: Add a method with the parameters user and user settings to update the user settings.
 }

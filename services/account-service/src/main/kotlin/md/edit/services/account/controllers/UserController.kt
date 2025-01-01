@@ -62,14 +62,16 @@ class UserController(private val userService: UserService) {
 
     @PatchMapping("me/settings")
     fun updateUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
-        val user = AuthorizationUtils.onlyUser(authentication)
+        val authUser = AuthorizationUtils.onlyUser(authentication)
 
         // PATCH
-        val oldUser = userService.getUser(user)
-        oldUser?.settings = UserSettings(Theme.LIGHT, Header.WIDE)
-        userService.updateUser(oldUser!!)
+        var user = userService.getUser(authUser) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+
+        // ToDo: The update logic should be moved to the service layer
+        user.settings.theme = Theme.LIGHT
+        user = userService.updateUser(user)
 
         // GET/RETURN
-        return ResponseEntity.ok(getMe(authentication).body?.settings)
+        return ResponseEntity.ok(user.settings)
     }
 }
