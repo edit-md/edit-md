@@ -44,7 +44,7 @@ class DocumentController(
     @GetMapping("/{id}")
     fun getDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
         val document = documentService.getDocumentById(authentication, id)
-        return ResponseEntity.ok(document.toDTO(withShared = true))
+        return ResponseEntity.ok(document.toDTO(withShared = true, withContent = true))
     }
 
     @DeleteMapping("/{id}")
