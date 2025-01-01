@@ -37,7 +37,6 @@ class UserController(private val userService: UserService) {
                     withEmail = true
                 )
             )
-
         return ResponseEntity.ok(user.toDTO())
     }
 
@@ -52,25 +51,11 @@ class UserController(private val userService: UserService) {
     fun getUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
-        return ResponseEntity.ok(userService.getUser(user)?.toDTO()?.settings)
-    }
-
-    @PatchMapping("me")
-    fun updateUser(authentication: Authentication): ResponseEntity<UserDTO> {
-        val user = AuthorizationUtils.onlyUser(authentication)
-
-        // PATCH
-        val oldUser = userService.getUser(user)
-
-        oldUser?.name = "Dummy_User"
-        oldUser?.email = "dummy_user@example.com"
-        oldUser?.avatar = "keinBild_LOOOL"
-
-        oldUser?.settings = UserSettings(Theme.LIGHT, Header.WIDE)
-        userService.updateUser(oldUser!!)
-
-        // GET/RETURN
-        return ResponseEntity.ok(getMe(authentication).body)
+        return ResponseEntity.ok(userService.getUser(user)?.toDTO(
+            withConnectedAccounts = false,
+            withSettings = true,
+            withEmail = false
+        )?.settings)
     }
 
     @PatchMapping("me/settings")

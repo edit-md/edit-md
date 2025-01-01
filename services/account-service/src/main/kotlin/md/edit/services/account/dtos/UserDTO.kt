@@ -23,12 +23,6 @@ class UserDTO(user: User) {
 
 }
 
-//all options
-fun User.toDTO(): UserDTO {
-    return this.toDTO(withConnectedAccounts = true, withSettings = true, withEmail = true)
-}
-
-//choose what options you want
 fun User.toDTO(withConnectedAccounts: Boolean = false, withSettings: Boolean = false, withEmail: Boolean = false): UserDTO {
     val userDto = UserDTO(this)
 
