@@ -31,7 +31,7 @@ fun User.toDTO(withConnectedAccounts: Boolean = false, withSettings: Boolean = f
     }
 
     if (withSettings) {
-        userDto.settings = UserSettings()
+        userDto.settings = this.settings
     }
 
     if (withEmail) {
