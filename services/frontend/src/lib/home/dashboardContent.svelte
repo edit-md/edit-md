@@ -9,7 +9,7 @@
 <div class="pageContainer bg-background">
 	<Header {user}></Header>
 	<div class="contentContainer container mx-auto p-4">
-		<div class="w-full grid grid-cols-[1fr,auto] gap-4 mb-4 overflow-hidden">
+		<div class="w-full grid grid-cols-[1fr,auto] gap-4 overflow-hidden">
 			<div>
 				<h1 class="text-2xl font-bold">Your Documents</h1>
 		

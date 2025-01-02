@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import IconDelete from '$lib/icons/iconDelete.svelte';
 	import IconKebabVertical from '$lib/icons/iconKebabVertical.svelte';
 	import IconShare from '$lib/icons/iconShare.svelte';
@@ -33,6 +33,19 @@
 		currentDate;
 		return getRelativeTimeString(new Date(document.created), 'en');
 	});
+
+	async function deleteDocument() {
+		let resp = await fetch(`/api/documents/${document.id}`, {
+			method: 'DELETE',
+			headers: {
+				'X-CSRF-Protection': '1'
+			}
+		});
+
+		if(resp.ok) {
+			await invalidateAll();
+		}
+	}
 </script>
 
 <div class="overflow-clip rounded-md border border-foreground-20">
@@ -68,6 +81,7 @@
 				</DropdownMenu.Item>
 				<DropdownMenu.Item
 					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
+					onclick={deleteDocument}
 				>
 					<div class="flex items-center gap-2">
 						<IconDelete class="h-4 w-4" />
