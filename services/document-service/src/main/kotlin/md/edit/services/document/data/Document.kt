@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import java.util.*
 
 @Entity
-@Table(name = "documents")
+@Table(name = "document")
 data class Document(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,6 +14,7 @@ data class Document(
 
     var owner: UUID,
 
+    @Enumerated(EnumType.STRING)
     var visibility: DocumentVisibility = DocumentVisibility.PRIVATE,
 
     @Temporal(TemporalType.TIMESTAMP)

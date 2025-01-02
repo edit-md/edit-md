@@ -12,6 +12,7 @@ data class DocumentUser(
     @JoinColumn(name = "document_id", insertable = false, updatable = false)
     var document: Document,
 
+    @Enumerated(EnumType.STRING)
     var permission: DocumentPermission
 ) {
     override fun equals(other: Any?): Boolean {
