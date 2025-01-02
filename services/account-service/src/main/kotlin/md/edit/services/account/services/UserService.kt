@@ -5,7 +5,7 @@ import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
-import md.edit.services.account.data.UserSettings
+import md.edit.services.account.dtos.UserSettingsDTO
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
 import org.springframework.stereotype.Service
@@ -84,8 +84,16 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserSettings(user: User, userSettings: UserSettings): User {
-        user.settings = userSettings
+    fun updateUserSettings(user: User, userSettingsDTO: UserSettingsDTO): User {
+
+        if(userSettingsDTO.theme != null){
+            user.settings.theme = userSettingsDTO.theme!!
+        }
+
+        if (userSettingsDTO.headerType != null){
+            user.settings.headerType = userSettingsDTO.headerType!!
+        }
+
         return userRepository.save(user)
     }
 }

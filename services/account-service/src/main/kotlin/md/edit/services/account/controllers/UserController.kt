@@ -3,6 +3,7 @@ package md.edit.services.account.controllers
 import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
 import md.edit.services.account.data.UserSettings
 import md.edit.services.account.dtos.UserDTO
+import md.edit.services.account.dtos.UserSettingsDTO
 import md.edit.services.account.dtos.toDTO
 import md.edit.services.account.services.UserService
 import md.edit.services.account.utils.AuthorizationUtils
@@ -59,14 +60,14 @@ class UserController(private val userService: UserService) {
     }
 
     @PatchMapping("me/settings")
-    fun updateUserSettings(authentication: Authentication, @RequestBody userSettings: UserSettings): ResponseEntity<UserSettings> {
+    fun updateUserSettings(authentication: Authentication, @RequestBody userSettingsDTO: UserSettingsDTO): ResponseEntity<UserSettings> {
         val authUser = AuthorizationUtils.onlyUser(authentication)
         //for testing
         //val userSettings = UserSettings(Theme.LIGHT,Header.WIDE)
 
         // PATCH
         val user = userService.getUser(authUser) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-        val updatedUser = userService.updateUserSettings(user, userSettings)
+        val updatedUser = userService.updateUserSettings(user, userSettingsDTO)
 
         // GET/RETURN
         return ResponseEntity.ok(updatedUser.settings)

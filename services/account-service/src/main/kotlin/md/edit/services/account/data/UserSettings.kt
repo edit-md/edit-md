@@ -10,10 +10,10 @@ data class UserSettings(
     var theme: Theme = Theme.DARK,
 
     @Enumerated(EnumType.STRING)
-    var headerType: Header = Header.AUTO
+    var headerType: HeaderType = HeaderType.AUTO
 )
 
-enum class Header {
+enum class HeaderType {
     AUTO, WIDE, NARROW
 }
 
