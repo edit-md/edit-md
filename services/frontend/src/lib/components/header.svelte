@@ -47,7 +47,7 @@
 
 <style>
 	.headerContainer {
-		@apply sticky top-0 z-[100] h-fit bg-background-alt;
+		@apply sticky top-0 z-40 h-fit bg-background-alt;
 		view-transition-name: headerContainer;
 	}
 
