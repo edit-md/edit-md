@@ -1,5 +1,6 @@
 package md.edit.services.document.controllers
 
+import jakarta.validation.Valid
 import md.edit.services.document.dtos.*
 import md.edit.services.document.services.DocumentService
 import org.springframework.http.ResponseEntity
@@ -21,7 +22,7 @@ class DocumentController(
     @PostMapping("/")
     fun createDocument(
         authentication: Authentication,
-        @RequestBody data: DocumentCreateDTO
+        @Valid @RequestBody data: DocumentCreateDTO
     ): ResponseEntity<DocumentDTO> {
         val document = documentService.createDocument(
             authentication,
@@ -54,7 +55,7 @@ class DocumentController(
     fun updateDocument(
         authentication: Authentication,
         @PathVariable id: UUID,
-        @RequestBody data: DocumentPatchDTO
+        @Valid @RequestBody data: DocumentPatchDTO
     ): ResponseEntity<DocumentDTO> {
         val document = documentService.updateDocument(authentication, id, data.title, data.visibility)
         return ResponseEntity.ok(document.toDTO(withShared = true))
