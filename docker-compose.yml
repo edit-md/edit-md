@@ -120,8 +120,6 @@ services:
     documents-db:
         image: postgres:17.2
         restart: always
-        ports:
-            -   "5432:5432"
         environment:
             - POSTGRES_DB=${DOCUMENT_DB_NAME}
             - POSTGRES_USER=${DOCUMENT_DB_USER}
