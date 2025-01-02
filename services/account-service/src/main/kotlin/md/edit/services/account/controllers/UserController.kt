@@ -1,8 +1,6 @@
 package md.edit.services.account.controllers
 
 import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
-import md.edit.services.account.data.Header
-import md.edit.services.account.data.Theme
 import md.edit.services.account.data.UserSettings
 import md.edit.services.account.dtos.UserDTO
 import md.edit.services.account.dtos.toDTO
@@ -42,10 +40,10 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("me")
     fun getMe(authentication: Authentication): ResponseEntity<UserDTO> {
-        val user = AuthorizationUtils.onlyUser(authentication)
+        val authUser = AuthorizationUtils.onlyUser(authentication)
 
         return ResponseEntity.ok(
-            userService.getUser(user)?.toDTO(
+            userService.getUser(authUser)?.toDTO(
                 withConnectedAccounts = true,
                 withSettings = true,
                 withEmail = true
@@ -55,23 +53,22 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("me/settings")
     fun getUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
-        val user = AuthorizationUtils.onlyUser(authentication)
+        val authUser = AuthorizationUtils.onlyUser(authentication)
 
-        return ResponseEntity.ok(userService.getUser(user)?.settings)
+        return ResponseEntity.ok(userService.getUser(authUser)?.settings)
     }
 
     @PatchMapping("me/settings")
-    fun updateUserSettings(authentication: Authentication): ResponseEntity<UserSettings> {
+    fun updateUserSettings(authentication: Authentication, @RequestBody userSettings: UserSettings): ResponseEntity<UserSettings> {
         val authUser = AuthorizationUtils.onlyUser(authentication)
+        //for testing
+        //val userSettings = UserSettings(Theme.LIGHT,Header.WIDE)
 
         // PATCH
-        var user = userService.getUser(authUser) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-
-        // ToDo: The update logic should be moved to the service layer
-        user.settings.theme = Theme.LIGHT
-        user = userService.updateUser(user)
+        val user = userService.getUser(authUser) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        val updatedUser = userService.updateUserSettings(user, userSettings)
 
         // GET/RETURN
-        return ResponseEntity.ok(user.settings)
+        return ResponseEntity.ok(updatedUser.settings)
     }
 }

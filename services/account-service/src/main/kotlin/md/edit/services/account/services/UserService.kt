@@ -5,6 +5,7 @@ import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
+import md.edit.services.account.data.UserSettings
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
 import org.springframework.stereotype.Service
@@ -82,11 +83,9 @@ class UserService(
         return userRepository.findById(id).map { it }.orElse(null)
     }
 
-    // ToDo: This method should be removed.
     @Transactional
-    fun updateUser(user: User): User {
+    fun updateUserSettings(user: User, userSettings: UserSettings): User {
+        user.settings = userSettings
         return userRepository.save(user)
     }
-
-    // ToDo: Add a method with the parameters user and user settings to update the user settings.
 }
