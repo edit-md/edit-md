@@ -16,7 +16,6 @@
 	let currentDate = $state(new Date());
 
 	onMount(() => {
-		console.log(document);
 		const interval = setInterval(() => {
 			currentDate = new Date();
 		}, 1000);
@@ -25,7 +24,7 @@
 
 	let lastModifiedDate = $derived(new Date(document.lastModified));
 	let everModified = $derived(lastModifiedDate == new Date(0));
-	
+
 	let lastModifiedDateString = $derived.by(() => {
 		currentDate;
 		return getRelativeTimeString(lastModifiedDate, 'en');
@@ -36,31 +35,31 @@
 	});
 </script>
 
-<div class="border-foreground-20 overflow-clip rounded-md border">
+<div class="overflow-clip rounded-md border border-foreground-20">
 	<div class="px-3 pb-2 pt-1">
 		<div class="relative">
 			<h1 class="truncate text-xl font-bold">{document.title}</h1>
 			{#if !everModified}
-				<p class="text-foreground-50 text-sm">Created {createdDateString}</p>
+				<p class="text-sm text-foreground-50">Created {createdDateString}</p>
 			{:else}
-				<p class="text-foreground-50 text-sm">Edited {lastModifiedDateString}</p>
+				<p class="text-sm text-foreground-50">Edited {lastModifiedDateString}</p>
 			{/if}
 		</div>
 	</div>
-	<div class="border-foreground-20 flex items-stretch justify-between border-t">
+	<div class="flex items-stretch justify-between border-t border-foreground-20">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
-				class="border-foreground-20 hover:bg-foreground-20 flex w-fit items-center justify-center border-r px-3"
+				class="flex w-fit items-center justify-center border-r border-foreground-20 px-3 hover:bg-foreground-20"
 			>
 				<IconKebabVertical class="h-4 w-4" />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content
-				class="border-foreground-20 bg-background shadow-popover w-full max-w-[150px] rounded-lg border px-1 py-[5px]"
+				class="w-full max-w-[150px] rounded-lg border border-foreground-20 bg-background px-1 py-[5px] shadow-popover"
 				sideOffset={2}
 				align="start"
 			>
 				<DropdownMenu.Item
-					class="data-[highlighted]:bg-foreground-20 flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent"
+					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
 				>
 					<div class="flex items-center gap-2">
 						<IconShare class="h-4 w-4" />
@@ -68,7 +67,7 @@
 					</div>
 				</DropdownMenu.Item>
 				<DropdownMenu.Item
-					class="data-[highlighted]:bg-foreground-20 flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent"
+					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
 				>
 					<div class="flex items-center gap-2">
 						<IconDelete class="h-4 w-4" />
@@ -78,7 +77,7 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 		<button
-			class="border-foreground-20 hover:bg-foreground-20 flex items-center justify-center border-l px-4 py-2"
+			class="flex items-center justify-center border-l border-foreground-20 px-4 py-2 hover:bg-foreground-20"
 			onclick={editDocument}
 		>
 			Edit

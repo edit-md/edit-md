@@ -30,7 +30,7 @@
 
 	onMount(() => {
 		console.log(data.document);
-	})
+	});
 </script>
 
 <div class="pageContainer bg-background">

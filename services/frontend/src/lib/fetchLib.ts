@@ -20,7 +20,7 @@ export async function fetchProxy(
 	url: string,
 	options: RequestInit = {}
 ): Promise<Response> {
-	if(!req.cookies) {
+	if (!req.cookies) {
 		throw new SessionError('Cookies not found in request');
 	}
 
@@ -46,7 +46,7 @@ export async function fetchProxy(
 		options.headers.set('Cookie', `${existingCookie}; ${sessionCookieName}=${editmdSessionCookie}`);
 	}
 
-	var resp = await fetch(url, options);
+	var resp = await req.fetch(url, options);
 
 	// if unauthorized, remove the session cookie
 	if (resp.status === 401) {

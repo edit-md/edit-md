@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconAccount from '$lib/icons/iconAccount.svelte';
 	import IconSignout from '$lib/icons/iconSignout.svelte';
-import { DropdownMenu } from 'bits-ui';
+	import { DropdownMenu } from 'bits-ui';
 
 	interface Props {
 		user: {
@@ -33,17 +33,17 @@ import { DropdownMenu } from 'bits-ui';
 		align="end"
 	>
 		<DropdownMenu.Item
-			class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20 gap-2"
+			class="flex h-10 select-none items-center gap-2 rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
 			href="/account"
 		>
-			<IconAccount class="w-4 h-4" />
+			<IconAccount class="h-4 w-4" />
 			<div class="flex items-center">Account</div>
 		</DropdownMenu.Item>
 		<DropdownMenu.Item
-			class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20 gap-2"
+			class="flex h-10 select-none items-center gap-2 rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
 			onclick={logout}
 		>
-			<IconSignout class="w-4 h-4" />
+			<IconSignout class="h-4 w-4" />
 			<div class="flex items-center">Logout</div>
 		</DropdownMenu.Item>
 	</DropdownMenu.Content>

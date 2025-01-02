@@ -10,7 +10,7 @@
 	let user = $state(data.user);
 
 	let documentState = $state({
-		title: data.document?.title || 'Untitled' ,
+		title: data.document?.title || 'Untitled',
 		content: data.document?.content || ''
 	});
 

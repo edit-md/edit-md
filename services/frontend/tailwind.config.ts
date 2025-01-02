@@ -35,7 +35,7 @@ export default {
 				}
 			},
 			height: {
-				"input": "var(--input-height)"
+				input: 'var(--input-height)'
 			},
 			boxShadow: {
 				mini: 'var(--shadow-mini)',

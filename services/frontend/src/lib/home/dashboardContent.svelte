@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CreateDocumentDialog from '$lib/components/createDocumentDialog.svelte';
-import DocumentCard from '$lib/components/documentCard.svelte';
+	import DocumentCard from '$lib/components/documentCard.svelte';
 	import Header from '$lib/components/header.svelte';
 
 	let { user, documents } = $props();
@@ -16,25 +16,25 @@ import DocumentCard from '$lib/components/documentCard.svelte';
 		</p>
 
 		{#if documents}
-		<h2 class="mb-2 text-xl font-semibold">Created by you</h2>
-		<div class="documentGrid mb-4 grid gap-2">
-			{#if documents.owned.length === 0}
-				<p class="text-foreground-50">No documents created by you yet.</p>
-			{/if}
-			{#each documents.owned as document}
-				<DocumentCard {document}/>
-			{/each}
-		</div>
+			<h2 class="mb-2 text-xl font-semibold">Created by you</h2>
+			<div class="documentGrid mb-4 grid gap-2">
+				{#if documents.owned.length === 0}
+					<p class="text-foreground-50">No documents created by you yet.</p>
+				{/if}
+				{#each documents.owned as document}
+					<DocumentCard {document} />
+				{/each}
+			</div>
 
-		<h2 class="mb-2 text-xl font-semibold">Shared with you</h2>
-		<div class="documentGrid grid gap-2">
-			{#if documents.shared.length === 0}
-				<p class="text-foreground-50">No documents shared with you yet.</p>
-			{/if}
-			{#each documents.shared as document}
-				<DocumentCard {document}/>
-			{/each}
-		</div>
+			<h2 class="mb-2 text-xl font-semibold">Shared with you</h2>
+			<div class="documentGrid grid gap-2">
+				{#if documents.shared.length === 0}
+					<p class="text-foreground-50">No documents shared with you yet.</p>
+				{/if}
+				{#each documents.shared as document}
+					<DocumentCard {document} />
+				{/each}
+			</div>
 		{/if}
 	</div>
 </div>
