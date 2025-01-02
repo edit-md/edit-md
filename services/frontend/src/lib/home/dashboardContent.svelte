@@ -9,11 +9,17 @@
 <div class="pageContainer bg-background">
 	<Header {user}></Header>
 	<div class="contentContainer container mx-auto p-4">
-		<h1 class="text-2xl font-bold">Your Documents</h1>
-		<CreateDocumentDialog />
-		<p class="mb-2 text-lg text-foreground-80">
-			Here are the documents you have created or have been shared with you.
-		</p>
+		<div class="w-full flex justify-between items-center gap-2">
+			<div>
+				<h1 class="text-2xl font-bold">Your Documents</h1>
+		
+				<p class="mb-2 text-lg text-foreground-80">
+					Here are the documents you have created or have been shared with you.
+				</p>
+			</div>
+			<CreateDocumentDialog />
+		</div>
+
 
 		{#if documents}
 			<h2 class="mb-2 text-xl font-semibold">Created by you</h2>

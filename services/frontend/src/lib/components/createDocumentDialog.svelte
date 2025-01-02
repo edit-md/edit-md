@@ -7,6 +7,7 @@
 	import { Dialog, Label, ToggleGroup } from 'bits-ui';
 	import { fade } from 'svelte/transition';
 	import Input from './input.svelte';
+	import IconAdd from '$lib/icons/iconAdd.svelte';
 
 	const defaultFormData = () => ({
 		title: {
@@ -45,6 +46,9 @@
 			const errors = await parseBadRequest(resp);
 			formData = deepMerge(formData, errors);
 			return;
+		} else {
+			const data = await resp.text();
+			console.error('Failed to create document', resp, data);
 		}
 	}
 
@@ -55,8 +59,11 @@
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Trigger class="">New Document</Dialog.Trigger>
-	<Dialog.Portal class="">
+	<Dialog.Trigger class="flex items-center gap-2 px-4 py-2 hover:bg-foreground-20 cursor-pointer bg-foreground-10 rounded-md transition-all text-nowrap">
+		<IconAdd />
+		New Document
+	</Dialog.Trigger>
+	<Dialog.Portal>
 		<Dialog.Overlay
 			transition={fade}
 			transitionConfig={{ duration: 150 }}
