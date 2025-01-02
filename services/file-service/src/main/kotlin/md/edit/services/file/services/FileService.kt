@@ -9,6 +9,7 @@ import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
 import io.minio.errors.MinioException
 import md.edit.services.file.data.File
+import md.edit.services.file.dtos.FileDto
 import md.edit.services.file.repos.FileMetadataRepository
 import java.time.LocalDateTime
 import java.util.*
@@ -39,9 +40,15 @@ class FileService(private val fileRepository: FileRepository,
     }
 
     @Throws(MinioException::class, IOException::class, IllegalArgumentException::class)
-    fun generatePresidedDownloadUrl(fileId: UUID): String {
+    fun generatePresignedDownloadUrl(fileId: UUID): String {
         val file = metadataRepository.findById(fileId)
             .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
-        return fileRepository.generatePresidedDownloadUrl(file.path)
+        return fileRepository.generatePresignedDownloadUrl(file.path)
+    }
+
+    fun getFileInformation(fileId: UUID): FileDto {
+        val file = metadataRepository.findById(fileId)
+            .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
+        return FileDto(file.documentId, file.path, file.type, file.createdDate)
     }
 }

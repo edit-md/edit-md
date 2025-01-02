@@ -57,7 +57,7 @@ class FileRepository(private val minioClient: MinioClient) {
     }
 
     @Throws(MinioException::class, IOException::class)
-    fun generatePresidedDownloadUrl(filePath: String): String {
+    fun generatePresignedDownloadUrl(filePath: String): String {
         try {
             return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()

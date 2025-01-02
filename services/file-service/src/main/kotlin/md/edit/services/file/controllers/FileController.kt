@@ -1,18 +1,21 @@
 package md.edit.services.file.controllers
 
+import md.edit.services.file.dtos.FileDto
 import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.security.core.Authentication
 import md.edit.services.file.services.FileService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
 import java.io.IOException
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
 import java.util.*
 
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping
 class FileController(private val fileService: FileService) {
 
     @PostMapping("/upload")
@@ -33,10 +36,20 @@ class FileController(private val fileService: FileService) {
     }
 
     @GetMapping("/{fileId}/download")
-    fun getPresidedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
+    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
         val user = AuthorizationUtils.onlyUser(authentication)
         // No Permission handling
-        val presignedUrl = fileService.generatePresidedDownloadUrl(fileId)
+        val presignedUrl = fileService.generatePresignedDownloadUrl(fileId)
         return ResponseEntity.ok(presignedUrl)
+    }
+
+    @GetMapping("/{fileId}")
+    fun getFileInformation(@PathVariable fileId: UUID): ResponseEntity<FileDto> {
+        try {
+            val fileDto = fileService.getFileInformation(fileId)
+            return ResponseEntity.ok(fileDto)
+        } catch(e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        }
     }
 }
