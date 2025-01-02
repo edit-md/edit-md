@@ -9,6 +9,8 @@
 	import Input from './input.svelte';
 	import IconAdd from '$lib/icons/iconAdd.svelte';
 
+	let { class: className = '' } = $props();
+
 	const defaultFormData = () => ({
 		title: {
 			value: '',
@@ -59,7 +61,7 @@
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Trigger class="flex items-center gap-2 px-4 py-2 hover:bg-foreground-20 cursor-pointer bg-foreground-10 rounded-md transition-all text-nowrap">
+	<Dialog.Trigger class="flex items-center gap-2 px-4 py-2 hover:bg-foreground-20 cursor-pointer bg-foreground-10 rounded-md transition-color text-nowrap {className}">
 		<IconAdd />
 		New Document
 	</Dialog.Trigger>

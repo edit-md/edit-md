@@ -9,7 +9,7 @@
 <div class="pageContainer bg-background">
 	<Header {user}></Header>
 	<div class="contentContainer container mx-auto p-4">
-		<div class="w-full flex justify-between items-center gap-2">
+		<div class="w-full grid grid-cols-[1fr,auto] gap-4 mb-4 overflow-hidden">
 			<div>
 				<h1 class="text-2xl font-bold">Your Documents</h1>
 		
@@ -17,8 +17,11 @@
 					Here are the documents you have created or have been shared with you.
 				</p>
 			</div>
-			<CreateDocumentDialog />
+			<div class="flex items-center justify-end mr-[2px]">
+				<CreateDocumentDialog />
+			</div>
 		</div>
+		
 
 
 		{#if documents}
