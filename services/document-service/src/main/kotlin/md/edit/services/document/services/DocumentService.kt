@@ -16,7 +16,7 @@ class DocumentService(
 ) {
 
     @Transactional
-    fun getDocumentById(authentication: Authentication, id: UUID): Document {
+    fun getDocument(authentication: Authentication, id: UUID): Document {
         val document = documentRepository.findById(id).orElseThrow { DocumentNotFoundException() }
 
         // Allow API access without further checks
@@ -68,15 +68,26 @@ class DocumentService(
     }
 
     @Transactional
+    fun getOwnedDocuments(authentication: Authentication): Collection<Document> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+        return documentRepository.findByOwner(user.id)
+    }
+
+    @Transactional
     fun getSharedDocuments(authentication: Authentication): Collection<Document> {
         val user = AuthorizationUtils.onlyUser(authentication)
         return documentRepository.findByShared(user.id)
     }
 
     @Transactional
-    fun getOwnedDocuments(authentication: Authentication): Collection<Document> {
-        val user = AuthorizationUtils.onlyUser(authentication)
-        return documentRepository.findByOwner(user.id)
+    fun updateDocument(authentication: Authentication, documentId: UUID, title: String?, visibility: DocumentVisibility?): Document {
+        AuthorizationUtils.onlyUser(authentication)
+        val document = documentRepository.findById(documentId).orElseThrow { DocumentNotFoundException() }
+
+        document.title = title ?: document.title
+        document.visibility = visibility ?: document.visibility
+
+        return documentRepository.save(document)
     }
 
     @Transactional

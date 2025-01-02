@@ -19,7 +19,10 @@ class DocumentController(
     }
 
     @PostMapping("/")
-    fun createDocument(authentication: Authentication, @RequestBody data: DocumentInDTO): ResponseEntity<DocumentDTO> {
+    fun createDocument(
+        authentication: Authentication,
+        @RequestBody data: DocumentCreateDTO
+    ): ResponseEntity<DocumentDTO> {
         val document = documentService.createDocument(
             authentication,
             data.title,
@@ -43,8 +46,18 @@ class DocumentController(
 
     @GetMapping("/{id}")
     fun getDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
-        val document = documentService.getDocumentById(authentication, id)
+        val document = documentService.getDocument(authentication, id)
         return ResponseEntity.ok(document.toDTO(withShared = true, withContent = true))
+    }
+
+    @PatchMapping("/{id}")
+    fun updateDocument(
+        authentication: Authentication,
+        @PathVariable id: UUID,
+        @RequestBody data: DocumentPatchDTO
+    ): ResponseEntity<DocumentDTO> {
+        val document = documentService.updateDocument(authentication, id, data.title, data.visibility)
+        return ResponseEntity.ok(document.toDTO(withShared = true))
     }
 
     @DeleteMapping("/{id}")
