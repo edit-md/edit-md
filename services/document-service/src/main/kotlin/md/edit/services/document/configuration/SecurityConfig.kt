@@ -40,11 +40,14 @@ class SecurityConfig(
         // Disable the default CSRF protection
         http.csrf { it.disable() }
 
+        // Remove the protocol from the host
+        val host = applicationHost.replace("https://", "").replace("http://", "")
+
         // Enable CORS and allow requests from the frontend
         http.cors {
             val source = UrlBasedCorsConfigurationSource()
             val config = CorsConfiguration()
-            config.allowedOrigins = listOf(applicationHost)
+            config.allowedOrigins = listOf("https://$host", "http://$host")
             config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             config.allowedHeaders = listOf("*")
             config.allowCredentials = true
