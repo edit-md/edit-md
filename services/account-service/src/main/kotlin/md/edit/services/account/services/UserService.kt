@@ -5,12 +5,14 @@ import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
 import md.edit.services.account.data.ConnectedAccount
 import md.edit.services.account.data.ConnectedAccountId
 import md.edit.services.account.data.User
-import md.edit.services.account.dtos.UserSettingsDTO
+import md.edit.services.account.data.UserSettings
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.isAccessible
 
 @Service
 class UserService(
@@ -84,14 +86,26 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserSettings(user: User, userSettingsDTO: UserSettingsDTO): User {
+    fun updateUserSettings(user: User, newUserSettings: UserSettings): User {
 
-        if(userSettingsDTO.theme != null){
-            user.settings.theme = userSettingsDTO.theme!!
-        }
+        // Iterate through all properties of the newUserSettings object
+        for (property in newUserSettings::class.declaredMemberProperties) {
+            // Get the value of the current property from newUserSettings
+            val value = property.call(newUserSettings)
 
-        if (userSettingsDTO.headerType != null){
-            user.settings.headerType = userSettingsDTO.headerType!!
+            // If the value is not null, update the corresponding property in user.settings
+            if (value != null) {
+                // Find the matching property in user.settings based on the property name
+                val userSettingsProp = user.settings::class.declaredMemberProperties.find { it.name == property.name }
+
+                if (userSettingsProp != null) {
+                    // Make the property accessible for reflection
+                    userSettingsProp.isAccessible = true
+
+                    // Set the value to the corresponding property in user.settings
+                    (userSettingsProp as kotlin.reflect.KMutableProperty<*>).setter.call(user.settings, value)
+                }
+            }
         }
 
         return userRepository.save(user)

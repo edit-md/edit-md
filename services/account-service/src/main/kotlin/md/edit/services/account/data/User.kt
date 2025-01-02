@@ -20,7 +20,7 @@ data class User(
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    var settings: UserSettings = UserSettings(),
+    var settings: UserSettings = UserSettings.DEFAULT,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var connectedAccounts: MutableList<ConnectedAccount> = mutableListOf() // Using List for immutability
