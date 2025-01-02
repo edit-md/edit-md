@@ -56,4 +56,11 @@ class FileService(private val fileRepository: FileRepository,
             .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
         return FileDtoOut(file.documentId, file.path, file.type, file.createdDate)
     }
+
+    fun deleteFile(fileId: UUID){
+        val file = metadataRepository.findById(fileId)
+            .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
+        fileRepository.deleteFile(file.path)
+        metadataRepository.deleteById(fileId)
+    }
 }

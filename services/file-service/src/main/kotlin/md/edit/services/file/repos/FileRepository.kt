@@ -1,9 +1,6 @@
 package md.edit.services.file.repos
 
-import io.minio.MinioClient
-import io.minio.PutObjectArgs
-import io.minio.GetObjectArgs
-import io.minio.GetPresignedObjectUrlArgs
+import io.minio.*
 import io.minio.errors.MinioException
 import io.minio.http.Method
 import org.springframework.beans.factory.annotation.Value
@@ -13,6 +10,7 @@ import java.io.InputStream
 import java.io.IOException
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Repository
@@ -86,6 +84,19 @@ class FileRepository(private val minioClient: MinioClient) {
             )
         } catch (e: MinioException) {
             throw IOException("Error from MinIO: ${e.message}", e)
+        }
+    }
+
+    fun deleteFile(filePath: String) {
+        try {
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(filePath)
+                    .build()
+            )
+        } catch (e: MinioException) {
+            throw IOException("Error during delete from MinIO: ${e.message}", e)
         }
     }
 }

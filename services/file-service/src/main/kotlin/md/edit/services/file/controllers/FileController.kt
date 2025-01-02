@@ -37,10 +37,14 @@ class FileController(private val fileService: FileService) {
 
     @GetMapping("/{fileId}/download")
     fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
-        val user = AuthorizationUtils.onlyUser(authentication)
-        // No Permission handling
-        val presignedUrl = fileService.generatePresignedDownloadUrl(fileId)
-        return ResponseEntity.ok(presignedUrl)
+        try {
+            val user = AuthorizationUtils.onlyUser(authentication)
+            // No Permission handling
+            val presignedUrl = fileService.generatePresignedDownloadUrl(fileId)
+            return ResponseEntity.ok(presignedUrl)
+        } catch(e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        }
     }
 
     @PostMapping
@@ -56,6 +60,18 @@ class FileController(private val fileService: FileService) {
         try {
             val fileDto = fileService.getFileInformation(fileId)
             return ResponseEntity.ok(fileDto)
+        } catch(e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        }
+    }
+
+    @DeleteMapping("/{fileId}")
+    fun deleteFile(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<Boolean> {
+        try {
+            val user = AuthorizationUtils.onlyUser(authentication)
+            // No permission handling
+            fileService.deleteFile(fileId)
+            return ResponseEntity.ok(true)
         } catch(e: IllegalArgumentException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
         }
