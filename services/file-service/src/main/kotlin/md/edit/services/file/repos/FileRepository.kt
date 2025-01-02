@@ -71,4 +71,21 @@ class FileRepository(private val minioClient: MinioClient) {
             throw IOException("Error during fetch from MinIO: ${e.message}", e)
         }
     }
+
+    @Throws(MinioException::class, IOException::class)
+    fun generatePresignedUploadUrl(): String {
+        val placeholderObjectName = "temporary-upload-${System.currentTimeMillis()}"
+        try {
+            return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(placeholderObjectName)
+                    .method(Method.PUT)
+                    .expiry(1, TimeUnit.MINUTES)
+                    .build()
+            )
+        } catch (e: MinioException) {
+            throw IOException("Error from MinIO: ${e.message}", e)
+        }
+    }
 }

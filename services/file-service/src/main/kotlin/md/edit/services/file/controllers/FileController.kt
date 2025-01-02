@@ -1,6 +1,6 @@
 package md.edit.services.file.controllers
 
-import md.edit.services.file.dtos.FileDto
+import md.edit.services.file.dtos.FileDtoOut
 import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.security.core.Authentication
 import md.edit.services.file.services.FileService
@@ -43,8 +43,16 @@ class FileController(private val fileService: FileService) {
         return ResponseEntity.ok(presignedUrl)
     }
 
+    @PostMapping
+    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<String> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+        // No permission handling
+        val presignedUrl = fileService.generatePresignedUploadUrl()
+        return ResponseEntity.ok(presignedUrl)
+    }
+
     @GetMapping("/{fileId}")
-    fun getFileInformation(@PathVariable fileId: UUID): ResponseEntity<FileDto> {
+    fun getFileInformation(@PathVariable fileId: UUID): ResponseEntity<FileDtoOut> {
         try {
             val fileDto = fileService.getFileInformation(fileId)
             return ResponseEntity.ok(fileDto)
