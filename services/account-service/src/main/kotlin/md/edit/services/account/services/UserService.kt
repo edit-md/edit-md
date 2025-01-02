@@ -81,4 +81,9 @@ class UserService(
         return userRepository.findById(id).map { it }.orElse(null)
     }
 
+    @Transactional
+    fun searchNames(searchTerm: String): Collection<User> {
+        return userRepository.findUsersByName(searchTerm)
+    }
+
 }

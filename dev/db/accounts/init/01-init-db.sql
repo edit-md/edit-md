@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TABLE users (
     id     UUID NOT NULL PRIMARY KEY,
     avatar VARCHAR(255),
@@ -12,3 +14,5 @@ CREATE TABLE connected_accounts (
     PRIMARY KEY (provider, remote_id),
     UNIQUE (provider, user_id)
 );
+
+CREATE INDEX idx_users_name_trgm ON users USING GIN (name gin_trgm_ops);
