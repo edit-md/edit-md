@@ -1,6 +1,8 @@
 package md.edit.services.document.data
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcType
+import org.hibernate.dialect.PostgreSQLEnumJdbcType
 
 @Entity
 @Table(name = "document_users")
@@ -12,7 +14,8 @@ data class DocumentUser(
     @JoinColumn(name = "document_id", insertable = false, updatable = false)
     var document: Document,
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated
+    @JdbcType(PostgreSQLEnumJdbcType::class)
     var permission: DocumentPermission
 ) {
     override fun equals(other: Any?): Boolean {

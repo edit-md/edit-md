@@ -1,6 +1,9 @@
 package md.edit.services.document.data
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcType
+import org.hibernate.annotations.Type
+import org.hibernate.dialect.PostgreSQLEnumJdbcType
 import java.util.*
 
 @Entity
@@ -14,7 +17,8 @@ data class Document(
 
     var owner: UUID,
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated
+    @JdbcType(PostgreSQLEnumJdbcType::class)
     var visibility: DocumentVisibility = DocumentVisibility.PRIVATE,
 
     @Temporal(TemporalType.TIMESTAMP)
