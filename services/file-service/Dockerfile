@@ -16,24 +16,22 @@ ENV SPRING_PROFILES_ACTIVE=dev
 
 WORKDIR /app
 
-# Install entr (file-watcher) in a single layer
-RUN apt-get update && apt-get install -y entr && rm -rf /var/lib/apt/lists/*
+# Install entr (file-watcher) and dos2unix in a single layer
+RUN apt-get update && apt-get install -y entr dos2unix && rm -rf /var/lib/apt/lists/*
 
-# Copy pom.xml and download dependencies
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# Remove pom.xml after resolving dependencies
-RUN mvn dependency:go-offline -B && rm pom.xml
-
-# Copy auto compile script and source code
-COPY springAutoCompile.sh .
-RUN chmod +x springAutoCompile.sh
 COPY . .
+
+# Convert the autocompile script to Unix format and make it executable
+RUN dos2unix springAutoCompile.sh
+RUN chmod +x springAutoCompile.sh
 
 # Persistent Maven cache for development
 VOLUME /root/.m2  
 EXPOSE 8080
-CMD ["sh", "./springAutoCompile.sh"]
+ENTRYPOINT ["./springAutoCompile.sh"]
 
 # Production Stage
 FROM gcr.io/distroless/java21:nonroot
