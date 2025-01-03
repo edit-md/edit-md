@@ -9,7 +9,7 @@
 </script>
 
 {#if loggedIn}
-	<DashboardContent {user} />
+	<DashboardContent {user} documents={data.documents} />
 {:else}
 	<StartContent />
 {/if}

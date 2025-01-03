@@ -16,19 +16,20 @@ ENV SPRING_PROFILES_ACTIVE=dev
 
 WORKDIR /app
 
-# Install entr (file-watcher) in a single layer
-RUN apt-get update && apt-get install -y entr
+# Install entr (file-watcher) and dos2unix in a single layer
+RUN apt-get update && apt-get install -y entr dos2unix && rm -rf /var/lib/apt/lists/*
 
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-COPY springAutoCompile.sh .
-RUN chmod +x springAutoCompile.sh
-
 COPY . .
 
+# Convert the autocompile script to Unix format and make it executable
+RUN dos2unix springAutoCompile.sh
+RUN chmod +x springAutoCompile.sh
+
 EXPOSE 8080
-CMD ["sh", "./springAutoCompile.sh"]
+ENTRYPOINT ["./springAutoCompile.sh"]
 
 # Production Stage
 FROM gcr.io/distroless/java21:nonroot
