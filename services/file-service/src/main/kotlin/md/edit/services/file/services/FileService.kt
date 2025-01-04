@@ -13,48 +13,35 @@ import md.edit.services.file.dtos.FileDtoOut
 import md.edit.services.file.repos.FileMetadataRepository
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.ArrayList
 
 @Service
 class FileService(private val fileRepository: FileRepository,
     private val metadataRepository: FileMetadataRepository) {
 
-    @Throws(IOException::class, MinioException::class, NoSuchAlgorithmException::class, InvalidKeyException::class)
-    fun uploadFile(file: MultipartFile): String {
-        val documentId = UUID.randomUUID()
-        val path = "files/${documentId}/${file.originalFilename}"
-        fileRepository.uploadFile(file, path)
-
-        val metadata = File(
-            documentId = documentId,
-            path = path,
-            createdDate = LocalDateTime.now(),
-            type = file.contentType ?: "application/octet-stream"
-        )
-        metadataRepository.save(metadata)
-        return path
+    fun getFileInformation(fileId: UUID): FileDtoOut {
+        val file = metadataRepository.findById(fileId)
+            .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
+        return FileDtoOut(file.documentId, file.path, file.type, file.createdDate)
     }
 
-    @Throws(MinioException::class, IOException::class)
-    fun downloadFile(objectName: String): InputStream {
-        return fileRepository.downloadFile(objectName)
-    }
-
-    @Throws(MinioException::class, IOException::class, IllegalArgumentException::class)
     fun generatePresignedDownloadUrl(fileId: UUID): String {
         val file = metadataRepository.findById(fileId)
             .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
         return fileRepository.generatePresignedDownloadUrl(file.path)
     }
 
-    @Throws(MinioException::class, IOException::class)
-    fun generatePresignedUploadUrl(): String {
-        return fileRepository.generatePresignedUploadUrl()
+    fun getAllFilesFromDocument(documentId: UUID): List<FileDtoOut> {
+        val files: List<File> = metadataRepository.findByDocumentId(documentId)
+        val fileDtoList: MutableList<FileDtoOut> = ArrayList()
+        for (file in files) {
+            fileDtoList.add(FileDtoOut(file))
+        }
+        return fileDtoList
     }
 
-    fun getFileInformation(fileId: UUID): FileDtoOut {
-        val file = metadataRepository.findById(fileId)
-            .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
-        return FileDtoOut(file.documentId, file.path, file.type, file.createdDate)
+    fun generatePresignedUploadUrl(): String {
+        return fileRepository.generatePresignedUploadUrl()
     }
 
     fun deleteFile(fileId: UUID){
