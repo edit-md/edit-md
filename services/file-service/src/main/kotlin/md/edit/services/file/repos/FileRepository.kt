@@ -19,41 +19,6 @@ class FileRepository(private val minioClient: MinioClient) {
     @Value("\${minio.bucket-name}")
     private lateinit var bucketName: String
 
-    @Throws(IOException::class, MinioException::class, NoSuchAlgorithmException::class, InvalidKeyException::class)
-    fun uploadFile(file: MultipartFile, filePath: String): String {
-        val inputStream = file.inputStream
-        try {
-            minioClient.putObject(
-                PutObjectArgs.builder()
-                    .bucket(bucketName)
-                    .`object`(filePath)
-                    .stream(inputStream, file.size, -1)
-                    .contentType(file.contentType ?: "application/octet-stream")
-                    .build()
-            )
-        } catch (e: MinioException) {
-            throw IOException("Error during upload to MinIO: ${e.message}", e)
-        } finally {
-            inputStream.close()
-        }
-
-        return filePath
-    }
-
-    @Throws(MinioException::class, IOException::class)
-    fun downloadFile(filePath: String): InputStream {
-        try {
-            return minioClient.getObject(
-                GetObjectArgs.builder()
-                    .bucket(bucketName)
-                    .`object`(filePath)
-                    .build()
-            )
-        } catch (e: MinioException) {
-            throw IOException("Error during fetch from MinIO: ${e.message}", e)
-        }
-    }
-
     @Throws(MinioException::class, IOException::class)
     fun generatePresignedDownloadUrl(filePath: String): String {
         try {

@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
@@ -22,8 +23,8 @@ class FileController(private val fileService: FileService) {
         try {
             val fileDto = fileService.getFileInformation(fileId)
             return ResponseEntity.ok(fileDto)
-        } catch(e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
+        } catch(e: FileNotFoundException) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, e.message)
         }
     }
 
