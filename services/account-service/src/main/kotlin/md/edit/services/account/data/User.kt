@@ -1,6 +1,8 @@
 package md.edit.services.account.data
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
 
 @Entity
@@ -15,6 +17,10 @@ data class User(
     var email: String,
 
     var avatar: String? = null,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    var settings: UserSettings = UserSettings.DEFAULT,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var connectedAccounts: MutableList<ConnectedAccount> = mutableListOf() // Using List for immutability

@@ -4,7 +4,8 @@ CREATE TABLE users (
     id     UUID NOT NULL PRIMARY KEY,
     avatar VARCHAR(255),
     email  VARCHAR(255),
-    name   VARCHAR(255)
+    name   VARCHAR(255),
+    settings JSONB
 );
 
 CREATE TABLE connected_accounts (

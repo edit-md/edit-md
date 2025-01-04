@@ -1,36 +1,50 @@
 <script lang="ts">
+	import CreateDocumentDialog from '$lib/components/createDocumentDialog.svelte';
 	import DocumentCard from '$lib/components/documentCard.svelte';
 	import Header from '$lib/components/header.svelte';
 
-	let { user } = $props();
+	let { user, documents } = $props();
 </script>
 
 <div class="pageContainer bg-background">
 	<Header {user}></Header>
 	<div class="contentContainer container mx-auto p-4">
-		<h1 class="text-2xl font-bold">Your Documents</h1>
-		<p class="mb-2 text-lg text-foreground-80">
-			Here are the documents you have created or have been shared with you.
-		</p>
-
-		<h2 class="mb-2 text-xl font-semibold">Created by you</h2>
-		<div class="documentGrid mb-4 grid gap-2">
-			<DocumentCard
-				document={{
-					title: 'Document 1 aaaaaaa a a adasd asd as d',
-					lastEdit: 'Last edited 2 days ago'
-				}}
-			/>
-			<DocumentCard document={{ title: 'Document 2', lastEdit: 'Last edited 5 days ago' }} />
-			<DocumentCard document={{ title: 'Document 3', lastEdit: 'Last edited 1 week ago' }} />
+		<div class="w-full grid grid-cols-[1fr,auto] gap-4 overflow-hidden">
+			<div>
+				<h1 class="text-2xl font-bold">Your Documents</h1>
+		
+				<p class="mb-2 text-lg text-foreground-80">
+					Here are the documents you have created or have been shared with you.
+				</p>
+			</div>
+			<div class="flex items-center justify-end mr-[2px]">
+				<CreateDocumentDialog />
+			</div>
 		</div>
+		
 
-		<h2 class="mb-2 text-xl font-semibold">Shared with you</h2>
-		<div class="documentGrid grid gap-2">
-			<DocumentCard document={{ title: 'Document 4', lastEdit: 'Last edited 3 days ago' }} />
-			<DocumentCard document={{ title: 'Document 5', lastEdit: 'Last edited 1 week ago' }} />
-			<DocumentCard document={{ title: 'Document 6', lastEdit: 'Last edited 2 weeks ago' }} />
-		</div>
+
+		{#if documents}
+			<h2 class="mb-2 text-xl font-semibold">Created by you</h2>
+			<div class="documentGrid mb-4 grid gap-2">
+				{#if documents.owned.length === 0}
+					<p class="text-foreground-50">No documents created by you yet.</p>
+				{/if}
+				{#each documents.owned as document}
+					<DocumentCard {document} />
+				{/each}
+			</div>
+
+			<h2 class="mb-2 text-xl font-semibold">Shared with you</h2>
+			<div class="documentGrid grid gap-2">
+				{#if documents.shared.length === 0}
+					<p class="text-foreground-50">No documents shared with you yet.</p>
+				{/if}
+				{#each documents.shared as document}
+					<DocumentCard {document} />
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
 

@@ -25,6 +25,8 @@ html {
 
 	--destructive: 347 77% 50%;
 	--constrast: 0 0% 0%;
+
+	--input-height: 2.75rem;
 }
 
 .dark {
