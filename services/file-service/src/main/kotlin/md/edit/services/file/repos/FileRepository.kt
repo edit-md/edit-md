@@ -19,7 +19,6 @@ class FileRepository(private val minioClient: MinioClient) {
     @Value("\${minio.bucket-name}")
     private lateinit var bucketName: String
 
-    @Throws(MinioException::class, IOException::class)
     fun generatePresignedDownloadUrl(filePath: String): String {
         try {
             return minioClient.getPresignedObjectUrl(
@@ -35,7 +34,6 @@ class FileRepository(private val minioClient: MinioClient) {
         }
     }
 
-    @Throws(MinioException::class, IOException::class)
     fun generatePresignedUploadUrl(): String {
         val placeholderObjectName = "temporary-upload-${System.currentTimeMillis()}"
         try {

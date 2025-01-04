@@ -29,10 +29,8 @@ class FileController(private val fileService: FileService) {
     }
 
     @GetMapping("/{fileId}/download")
-    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
+    fun getPresignedDownloadUrl(@PathVariable fileId: UUID): ResponseEntity<String> {
         try {
-            val user = AuthorizationUtils.onlyUser(authentication)
-            // No Permission handling
             val presignedUrl = fileService.generatePresignedDownloadUrl(fileId)
             return ResponseEntity.ok(presignedUrl)
         } catch(e: IllegalArgumentException) {
@@ -46,18 +44,14 @@ class FileController(private val fileService: FileService) {
     }
 
     @PostMapping
-    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<String> {
-        val user = AuthorizationUtils.onlyUser(authentication)
-        // No permission handling
+    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID): ResponseEntity<String> {
         val presignedUrl = fileService.generatePresignedUploadUrl()
         return ResponseEntity.ok(presignedUrl)
     }
 
     @DeleteMapping("/{fileId}")
-    fun deleteFile(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<Boolean> {
+    fun deleteFile(@PathVariable fileId: UUID): ResponseEntity<Boolean> {
         try {
-            val user = AuthorizationUtils.onlyUser(authentication)
-            // No permission handling
             fileService.deleteFile(fileId)
             return ResponseEntity.ok(true)
         } catch(e: IllegalArgumentException) {
