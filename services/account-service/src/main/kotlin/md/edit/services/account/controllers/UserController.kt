@@ -2,9 +2,7 @@ package md.edit.services.account.controllers
 
 import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
 import md.edit.services.account.data.UserSettings
-import md.edit.services.account.dtos.UserDTO
-import md.edit.services.account.dtos.UserDTOOut
-import md.edit.services.account.dtos.toDTO
+import md.edit.services.account.dtos.*
 import md.edit.services.account.services.UserService
 import md.edit.services.account.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
@@ -54,12 +52,11 @@ class UserController(private val userService: UserService) {
     }
 
     @GetMapping("/search")
-    fun getUsersByName(authentication: Authentication, @RequestHeader searchTerm: String): ResponseEntity<Collection<UserDTOOut>> {
+    fun getUsersByName(authentication: Authentication, @RequestParam name: String): ResponseEntity<Collection<UserDTO>> {
         val user = AuthorizationUtils.onlyUser(authentication)
 
         return ResponseEntity.ok(
-            userService.searchNames(searchTerm).stream().map { user -> UserDTOOut(user) }.collect(Collectors.toList())
-        )
+            userService.searchNames(name).map { it.toDTO() }.toList())
     }
 
     @GetMapping("me/settings")
