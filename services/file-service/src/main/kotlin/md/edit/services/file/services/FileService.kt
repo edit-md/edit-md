@@ -34,10 +34,18 @@ class FileService(private val fileRepository: FileRepository,
     @Value("\${edit-md.api-key}")
     private lateinit var apiKey: String
 
-    fun getFileInformation(fileId: UUID): FileDtoOut {
+    fun getFileInformation(fileId: UUID, authentication: Authentication): FileDtoOut {
+        val user = AuthorizationUtils.onlyUser(authentication)
 
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
+
+        val document = fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
+
+        if(!checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.READ)) {
+            throw NoPermissionException()
+        }
+
         return FileDtoOut(file)
     }
 
@@ -56,8 +64,17 @@ class FileService(private val fileRepository: FileRepository,
         return fileRepository.generatePresignedDownloadUrl(file.path)
     }
 
-    fun getAllFilesFromDocument(documentId: UUID): List<FileDtoOut> {
+    fun getAllFilesFromDocument(documentId: UUID, authentication: Authentication): List<FileDtoOut> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
+        val document = fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
+
+        if(!checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.READ)) {
+            throw NoPermissionException()
+        }
+
         val files: List<File> = metadataRepository.findByDocumentId(documentId)
+
         val fileDtoList: MutableList<FileDtoOut> = ArrayList()
         for (file in files) {
             fileDtoList.add(FileDtoOut(file))

@@ -2,14 +2,12 @@ package md.edit.services.file.controllers
 
 import md.edit.services.file.dtos.FileDtoOut
 import md.edit.services.file.services.FileService
-import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
@@ -19,8 +17,8 @@ import java.util.*
 class FileController(private val fileService: FileService) {
 
     @GetMapping("/{fileId}")
-    fun getFileInformation(@PathVariable fileId: UUID): ResponseEntity<FileDtoOut> {
-        val fileDto = fileService.getFileInformation(fileId)
+    fun getFileInformation(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<FileDtoOut> {
+        val fileDto = fileService.getFileInformation(fileId, authentication)
         return ResponseEntity.ok(fileDto)
     }
 
@@ -31,8 +29,8 @@ class FileController(private val fileService: FileService) {
     }
 
     @GetMapping
-    fun getAllFilesFromDocument(@RequestParam("doc") documentId: UUID): ResponseEntity<List<FileDtoOut>> {
-        return ResponseEntity.ok(fileService.getAllFilesFromDocument(documentId))
+    fun getAllFilesFromDocument(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<List<FileDtoOut>> {
+        return ResponseEntity.ok(fileService.getAllFilesFromDocument(documentId, authentication))
     }
 
     @PostMapping("/")
