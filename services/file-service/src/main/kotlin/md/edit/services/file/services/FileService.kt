@@ -1,17 +1,25 @@
 package md.edit.services.file.services
 
+import md.edit.services.file.configuration.cookieauth.CustomUserDetails
+import md.edit.services.file.data.DocumentPermission
+import md.edit.services.file.data.DocumentVisibility
 import md.edit.services.file.repos.FileRepository
 import org.springframework.stereotype.Service
 import md.edit.services.file.data.File
 import md.edit.services.file.dtos.DocumentDataDto
+import md.edit.services.file.dtos.DocumentUserDto
 import md.edit.services.file.dtos.FileDtoOut
+import md.edit.services.file.exceptions.DocumentNotFoundException
+import md.edit.services.file.exceptions.NoPermissionException
+import md.edit.services.file.exceptions.UploadedFileNotFoundException
 import md.edit.services.file.repos.FileMetadataRepository
+import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.security.core.Authentication
 import org.springframework.web.client.RestTemplate
-import java.io.FileNotFoundException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -27,14 +35,24 @@ class FileService(private val fileRepository: FileRepository,
     private lateinit var apiKey: String
 
     fun getFileInformation(fileId: UUID): FileDtoOut {
+
         val file = metadataRepository.findById(fileId)
-            .orElseThrow { FileNotFoundException("File with ID $fileId not found") }
+            .orElseThrow { UploadedFileNotFoundException() }
         return FileDtoOut(file)
     }
 
-    fun generatePresignedDownloadUrl(fileId: UUID): String {
+    fun generatePresignedDownloadUrl(fileId: UUID, authentication: Authentication): String {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
         val file = metadataRepository.findById(fileId)
-            .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
+            .orElseThrow { UploadedFileNotFoundException() }
+
+        val document = fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
+
+        if(!checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.READ) && document.visibility != DocumentVisibility.PUBLIC) {
+            throw NoPermissionException()
+        }
+
         return fileRepository.generatePresignedDownloadUrl(file.path)
     }
 
@@ -47,18 +65,36 @@ class FileService(private val fileRepository: FileRepository,
         return fileDtoList
     }
 
-    fun generatePresignedUploadUrl(): String {
+    fun generatePresignedUploadUrl(documentId: UUID, authentication: Authentication): String {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
+        val document = fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
+
+        if(!checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.WRITE)) {
+            throw NoPermissionException()
+        }
+
         return fileRepository.generatePresignedUploadUrl()
     }
 
-    fun deleteFile(fileId: UUID){
+    fun deleteFile(fileId: UUID, authentication: Authentication){
+
+        val user = AuthorizationUtils.onlyUser(authentication)
+
         val file = metadataRepository.findById(fileId)
-            .orElseThrow { IllegalArgumentException("File with ID $fileId not found") }
+            .orElseThrow { UploadedFileNotFoundException() }
+
+        val document = fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
+
+        if(!checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.WRITE)) {
+            throw NoPermissionException()
+        }
+
         fileRepository.deleteFile(file.path)
         metadataRepository.deleteById(fileId)
     }
 
-    fun fetchDocumentData(id: UUID): DocumentDataDto? {
+    private fun fetchDocumentData(id: UUID): DocumentDataDto? {
         val url = "$documentServiceHost/api/documents/$id"
 
         val headers = HttpHeaders().apply {
@@ -70,5 +106,19 @@ class FileService(private val fileRepository: FileRepository,
         val response = restTemplate.exchange(url, HttpMethod.GET, entity, DocumentDataDto::class.java)
 
         return response.body
+    }
+
+    private fun getPermissionOfSharedUser(sharedUsers: MutableList<DocumentUserDto>?, id: UUID): DocumentPermission? {
+        if (sharedUsers != null) {
+            for (user in sharedUsers)
+                if (user.userId == id)
+                    return user.permission
+        }
+
+        return null
+    }
+
+    private fun checkIfUserHasPermissionOnDocument(user: CustomUserDetails, document: DocumentDataDto, permission: DocumentPermission): Boolean {
+        return (user.id == document.owner || getPermissionOfSharedUser(document.shared, user.id) == permission)
     }
 }

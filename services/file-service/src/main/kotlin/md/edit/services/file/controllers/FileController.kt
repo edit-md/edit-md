@@ -20,22 +20,14 @@ class FileController(private val fileService: FileService) {
 
     @GetMapping("/{fileId}")
     fun getFileInformation(@PathVariable fileId: UUID): ResponseEntity<FileDtoOut> {
-        try {
-            val fileDto = fileService.getFileInformation(fileId)
-            return ResponseEntity.ok(fileDto)
-        } catch(e: FileNotFoundException) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, e.message)
-        }
+        val fileDto = fileService.getFileInformation(fileId)
+        return ResponseEntity.ok(fileDto)
     }
 
     @GetMapping("/{fileId}/download")
-    fun getPresignedDownloadUrl(@PathVariable fileId: UUID): ResponseEntity<String> {
-        try {
-            val presignedUrl = fileService.generatePresignedDownloadUrl(fileId)
-            return ResponseEntity.ok(presignedUrl)
-        } catch(e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
-        }
+    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
+        val presignedUrl = fileService.generatePresignedDownloadUrl(fileId, authentication)
+        return ResponseEntity.ok(presignedUrl)
     }
 
     @GetMapping
@@ -43,16 +35,16 @@ class FileController(private val fileService: FileService) {
         return ResponseEntity.ok(fileService.getAllFilesFromDocument(documentId))
     }
 
-    @PostMapping
-    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID): ResponseEntity<String> {
-        val presignedUrl = fileService.generatePresignedUploadUrl()
+    @PostMapping("/")
+    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<String> {
+        val presignedUrl = fileService.generatePresignedUploadUrl(documentId, authentication)
         return ResponseEntity.ok(presignedUrl)
     }
 
     @DeleteMapping("/{fileId}")
-    fun deleteFile(@PathVariable fileId: UUID): ResponseEntity<Boolean> {
+    fun deleteFile(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<Boolean> {
         try {
-            fileService.deleteFile(fileId)
+            fileService.deleteFile(fileId, authentication)
             return ResponseEntity.ok(true)
         } catch(e: IllegalArgumentException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
@@ -61,17 +53,17 @@ class FileController(private val fileService: FileService) {
 
     // Endpoint only for testing purposes
     @PostMapping("/upload")
-    fun uploadFile(): ResponseEntity<String> {
+    fun uploadFile(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<String> {
 
-        val fileName: String = "example.txt"
+        val fileName = "example.txt"
 
         // Make new File and URL
-        val presignedUrl : String = fileService.generatePresignedUploadUrl()
-        val file: File = File(fileName)
+        val presignedUrl : String = fileService.generatePresignedUploadUrl(documentId, authentication)
+        val file = File(fileName)
         file.createNewFile()
 
         // Write something in the file
-        val writer: FileWriter = FileWriter(file)
+        val writer = FileWriter(file)
         try {
             writer.write("I was born on the cemetery\n")
             writer.write("Under the sign of the moon")
@@ -85,8 +77,8 @@ class FileController(private val fileService: FileService) {
         val command = arrayOf(
             "curl",
             "-X", "PUT",
-            presignedUrl,
-            "-d", fileName
+            "--upload-file", fileName,
+            presignedUrl
         )
 
         try {
