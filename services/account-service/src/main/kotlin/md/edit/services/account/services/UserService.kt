@@ -86,6 +86,11 @@ class UserService(
     }
 
     @Transactional
+    fun searchNames(searchTerm: String): Collection<User> {
+        return userRepository.findUsersByName(searchTerm)
+    }
+
+    @Transactional
     fun updateUserSettings(user: User, newUserSettings: UserSettings): User {
 
         // Iterate through all properties of the newUserSettings object

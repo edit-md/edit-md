@@ -2,8 +2,7 @@ package md.edit.services.account.controllers
 
 import md.edit.services.account.configuration.apikeyauth.ApiKeyAuthentication
 import md.edit.services.account.data.UserSettings
-import md.edit.services.account.dtos.UserDTO
-import md.edit.services.account.dtos.toDTO
+import md.edit.services.account.dtos.*
 import md.edit.services.account.services.UserService
 import md.edit.services.account.utils.AuthorizationUtils
 import org.springframework.http.HttpStatus
@@ -14,6 +13,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
+import java.util.stream.Collectors
 
 @RestController
 class UserController(private val userService: UserService) {
@@ -49,6 +49,14 @@ class UserController(private val userService: UserService) {
                 withEmail = true
             ) ?: throw RuntimeException("User not found")
         )
+    }
+
+    @GetMapping("/search")
+    fun getUsersByName(authentication: Authentication, @RequestParam name: String): ResponseEntity<Collection<UserDTO>> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+
+        return ResponseEntity.ok(
+            userService.searchNames(name).map { it.toDTO() }.toList())
     }
 
     @GetMapping("me/settings")
