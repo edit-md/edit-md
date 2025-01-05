@@ -100,9 +100,9 @@ class DocumentController(
     @GetMapping("/search")
     fun getDocumentsByTitle(
         authentication: Authentication,
-        @RequestParam name: String
+        @RequestParam title: String
     ): ResponseEntity<Collection<DocumentDTO>> {
-        return ResponseEntity.ok(documentService.searchTitles(authentication, name).map
+        return ResponseEntity.ok(documentService.searchTitles(authentication, title).map
         { it.toDTO() }.toList())
     }
 }
