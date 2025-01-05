@@ -20,5 +20,5 @@ data class DocumentDataDto(
     var content: String? = null,
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    var shared: MutableList<DocumentUserDTO>? = null
+    var shared: MutableList<DocumentUserDto>? = null
 )
