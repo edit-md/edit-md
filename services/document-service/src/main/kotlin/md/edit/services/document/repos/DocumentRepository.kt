@@ -20,7 +20,7 @@ interface DocumentRepository : JpaRepository<Document, UUID> {
         SELECT d.*
         FROM document d
         JOIN document_users du ON d.id = du.document_id
-        WHERE du.user_id = :userId
+        WHERE du.user_id = :userId OR d.owner = :userId
         ORDER BY similarity(d.title, :searchTerm) DESC
         LIMIT 5;
     """,
