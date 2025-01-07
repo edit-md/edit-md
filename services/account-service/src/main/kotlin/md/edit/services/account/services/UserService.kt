@@ -94,8 +94,8 @@ class UserService(
                 name = it.name,
                 email = it.email,
                 avatar = it.avatar,
-                settings = UserSettings.DEFAULT, // Default-Werte setzen
-                connectedAccounts = mutableListOf() // Leere Liste, da nicht geladen
+                settings = UserSettings.DEFAULT,
+                connectedAccounts = mutableListOf()
             )
         }
     }
