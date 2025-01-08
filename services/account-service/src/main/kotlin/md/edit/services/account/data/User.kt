@@ -1,6 +1,7 @@
 package md.edit.services.account.data
 
 import jakarta.persistence.*
+import md.edit.services.account.converters.UserSettingsConverter
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.util.*
@@ -18,6 +19,7 @@ data class User(
 
     var avatar: String? = null,
 
+    @Convert(converter = UserSettingsConverter::class)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     var settings: UserSettings = UserSettings.DEFAULT,

@@ -66,8 +66,7 @@ class UserService(
         val remoteId = request.remoteId
 
         // get user from database
-        return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }
-            .orElseThrow { UserNotFoundException() }
+        return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }.orElse(null)
     }
 
     /**
