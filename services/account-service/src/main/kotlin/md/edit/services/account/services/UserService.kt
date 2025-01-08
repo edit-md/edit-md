@@ -105,11 +105,8 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserSettings(authentication: Authentication, theme: Theme?, headerType: HeaderType?): User {
+    fun updateUserSettings(authentication: Authentication, newUserSettings: UserSettings): User {
         val user: User = getUser(authentication)
-
-        //TODO PROPER HANDLING
-        val newUserSettings = UserSettings(theme, headerType)
 
         // Iterate through all properties of the newUserSettings object
         for (property in newUserSettings::class.declaredMemberProperties) {

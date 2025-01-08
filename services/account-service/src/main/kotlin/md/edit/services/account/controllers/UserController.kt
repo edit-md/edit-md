@@ -63,7 +63,7 @@ class UserController(private val userService: UserService) {
     fun updateUserSettings(
         authentication: Authentication, @RequestBody settings: UserSettings
     ): ResponseEntity<UserSettings> {
-        val updatedUser = userService.updateUserSettings(authentication, settings.theme, settings.headerType)
+        val updatedUser = userService.updateUserSettings(authentication, settings)
         return ResponseEntity.ok(updatedUser.settings)
     }
 }
