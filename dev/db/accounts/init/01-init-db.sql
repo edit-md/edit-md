@@ -11,7 +11,7 @@ CREATE TABLE users (
 CREATE TABLE connected_accounts (
     provider  VARCHAR(255) NOT NULL,
     remote_id VARCHAR(255) NOT NULL,
-    user_id   UUID REFERENCES users (id),
+    user_id   UUID REFERENCES users (id) ON DELETE CASCADE,
     PRIMARY KEY (provider, remote_id),
     UNIQUE (provider, user_id)
 );

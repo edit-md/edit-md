@@ -61,10 +61,9 @@ class UserController(private val userService: UserService) {
 
     @PatchMapping("me/settings")
     fun updateUserSettings(
-        authentication: Authentication, @RequestBody userSettingsDTO: UserSettings
+        authentication: Authentication, @RequestBody settings: UserSettings
     ): ResponseEntity<UserSettings> {
-        val user = userService.getUser(authentication)
-        val updatedUser = userService.updateUserSettings(user, userSettingsDTO)
+        val updatedUser = userService.updateUserSettings(authentication, settings.theme, settings.headerType)
         return ResponseEntity.ok(updatedUser.settings)
     }
 }
