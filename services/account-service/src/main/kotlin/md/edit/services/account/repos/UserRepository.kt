@@ -1,8 +1,9 @@
 package md.edit.services.account.repos
 
 import md.edit.services.account.data.User
+import md.edit.services.account.data.UserProjection
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Query
 
 import java.util.*
 
@@ -11,12 +12,12 @@ interface UserRepository : JpaRepository<User, UUID> {
 
     @Query(
         value = """
-            SELECT * 
+            SELECT id, name, email, avatar 
             FROM users
             ORDER BY similarity(name, :searchTerm) DESC
             LIMIT 10;
         """,
         nativeQuery = true
     )
-    fun findUsersByName(searchTerm: String): Collection<User>
+    fun findUsersByName(searchTerm: String): Collection<UserProjection>
 }

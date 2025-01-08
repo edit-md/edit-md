@@ -87,7 +87,17 @@ class UserService(
 
     @Transactional
     fun searchNames(searchTerm: String): Collection<User> {
-        return userRepository.findUsersByName(searchTerm)
+        val projections = userRepository.findUsersByName(searchTerm)
+        return projections.map {
+            User(
+                id = it.id,
+                name = it.name,
+                email = it.email,
+                avatar = it.avatar,
+                settings = UserSettings.DEFAULT,
+                connectedAccounts = mutableListOf()
+            )
+        }
     }
 
     @Transactional
