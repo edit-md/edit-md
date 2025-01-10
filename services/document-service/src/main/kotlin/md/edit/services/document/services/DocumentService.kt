@@ -154,4 +154,9 @@ class DocumentService(
         documentRepository.save(document)
     }
 
+    @Transactional
+    fun searchTitles(authentication: Authentication, searchTerm: String): Collection<Document> {
+        val user = AuthorizationUtils.onlyUser(authentication)
+        return documentRepository.findDocumentsByTitle(searchTerm, user.id)
+    }
 }

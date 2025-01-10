@@ -86,6 +86,21 @@ class UserService(
     }
 
     @Transactional
+    fun searchNames(searchTerm: String): Collection<User> {
+        val projections = userRepository.findUsersByName(searchTerm)
+        return projections.map {
+            User(
+                id = it.id,
+                name = it.name,
+                email = it.email,
+                avatar = it.avatar,
+                settings = UserSettings.DEFAULT,
+                connectedAccounts = mutableListOf()
+            )
+        }
+    }
+
+    @Transactional
     fun updateUserSettings(user: User, newUserSettings: UserSettings): User {
 
         // Iterate through all properties of the newUserSettings object

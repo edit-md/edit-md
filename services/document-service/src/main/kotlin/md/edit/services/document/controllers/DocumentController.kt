@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import java.util.stream.Collectors
 
 @RestController
 class DocumentController(
@@ -94,6 +95,15 @@ class DocumentController(
     ): ResponseEntity<Unit> {
         documentService.removeSharedUser(authentication, id, userId)
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/search")
+    fun getDocumentsByTitle(
+        authentication: Authentication,
+        @RequestParam title: String
+    ): ResponseEntity<Collection<DocumentDTO>> {
+        return ResponseEntity.ok(documentService.searchTitles(authentication, title).map
+        { it.toDTO() }.toList())
     }
 }
 

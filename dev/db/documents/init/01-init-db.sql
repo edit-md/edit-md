@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TYPE visibility_enum AS ENUM ('PRIVATE', 'PUBLIC');
 CREATE TYPE permission_enum AS ENUM ('READ', 'WRITE');
 
@@ -30,3 +32,4 @@ CREATE TABLE IF NOT EXISTS document_users (
 
 CREATE INDEX IF NOT EXISTS idx_document_owner ON document(owner);
 CREATE INDEX IF NOT EXISTS idx_document_users_user_id ON document_users(user_id);
+CREATE INDEX IF NOT EXISTS idx_documents_title_trgm ON document USING GIN (title gin_trgm_ops);
