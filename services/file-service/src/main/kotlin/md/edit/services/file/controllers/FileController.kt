@@ -18,8 +18,8 @@ class FileController(private val fileService: FileService) {
 
     @GetMapping("/{fileId}")
     fun getFileInformation(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<FileDtoOut> {
-        val fileDto = fileService.getFileInformation(fileId, authentication)
-        return ResponseEntity.ok(fileDto)
+        val file = fileService.getFileInformation(fileId, authentication)
+        return ResponseEntity.ok(FileDtoOut(file))
     }
 
     @GetMapping("/{fileId}/download")
@@ -30,7 +30,8 @@ class FileController(private val fileService: FileService) {
 
     @GetMapping
     fun getAllFilesFromDocument(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<List<FileDtoOut>> {
-        return ResponseEntity.ok(fileService.getAllFilesFromDocument(documentId, authentication))
+        val files = fileService.getAllFilesFromDocument(documentId, authentication)
+        return ResponseEntity.ok(files.map{FileDtoOut(it)})
     }
 
     @PostMapping("/")
