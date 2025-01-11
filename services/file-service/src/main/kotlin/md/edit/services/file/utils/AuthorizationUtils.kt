@@ -2,6 +2,8 @@ package md.edit.services.file.utils
 
 import md.edit.services.file.configuration.apikeyauth.ApiKeyAuthentication
 import md.edit.services.file.configuration.cookieauth.CustomUserDetails
+import md.edit.services.file.exceptions.AuthorizationException
+import md.edit.services.file.exceptions.NoPermissionException
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.web.server.ResponseStatusException
@@ -13,7 +15,7 @@ class AuthorizationUtils {
 
         fun onlyAPI(auth: Authentication): ApiKeyAuthentication {
             if(auth !is ApiKeyAuthentication) {
-                throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "This endpoint is only available for API requests")
+                throw AuthorizationException()
             }
 
             return auth
@@ -23,21 +25,34 @@ class AuthorizationUtils {
             val principal = auth.principal
 
             if(principal !is CustomUserDetails) {
-                throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "This endpoint is only available for authenticated users")
+                throw AuthorizationException()
             }
 
             return principal
         }
 
-        fun onlyUser(auth: Authentication, id: String): CustomUserDetails {
+        fun onlyUser(auth: Authentication, uuid: UUID): CustomUserDetails {
             val user = onlyUser(auth)
-            val uuid = runCatching { UUID.fromString(id) }.getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid id") }
 
             if(user.id != uuid) {
-                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource")
+                throw AuthorizationException()
             }
 
             return user
+        }
+
+        fun onlyUsers(auth: Authentication, vararg uuids: UUID): CustomUserDetails {
+            val user = onlyUser(auth)
+
+            if(user.id !in uuids) {
+                throw AuthorizationException()
+            }
+
+            return user
+        }
+
+        fun isAPI(auth: Authentication): Boolean {
+            return auth is ApiKeyAuthentication
         }
 
     }
