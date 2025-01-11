@@ -22,17 +22,22 @@ class DocumentService(private val restTemplate: RestTemplate) {
     private lateinit var apiKey: String
 
     fun fetchDocumentData(id: UUID): DocumentDataDto? {
-        val url = "$documentServiceHost/api/documents/$id"
 
-        val headers = HttpHeaders().apply {
-            add("X-CSRF-Protection", "1")
-            add("X-API-KEY", apiKey)
+        try {
+            val url = "$documentServiceHost/api/documents/$id"
+
+            val headers = HttpHeaders().apply {
+                add("X-CSRF-Protection", "1")
+                add("X-API-KEY", apiKey)
+            }
+
+            val entity = HttpEntity<Any>(headers)
+            val response = restTemplate.exchange(url, HttpMethod.GET, entity, DocumentDataDto::class.java)
+
+            return response.body
+        } catch (e: Exception) {
+            return null
         }
-
-        val entity = HttpEntity<Any>(headers)
-        val response = restTemplate.exchange(url, HttpMethod.GET, entity, DocumentDataDto::class.java)
-
-        return response.body
     }
 
     fun getPermissionOfSharedUser(sharedUsers: MutableList<DocumentUserDto>?, id: UUID): DocumentPermission? {

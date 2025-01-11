@@ -5,7 +5,6 @@ import md.edit.services.file.data.DocumentVisibility
 import md.edit.services.file.repos.FileRepository
 import org.springframework.stereotype.Service
 import md.edit.services.file.data.File
-import md.edit.services.file.dtos.FileDtoOut
 import md.edit.services.file.exceptions.DocumentNotFoundException
 import md.edit.services.file.exceptions.NoPermissionException
 import md.edit.services.file.exceptions.UploadedFileNotFoundException
@@ -13,7 +12,6 @@ import md.edit.services.file.repos.FileMetadataRepository
 import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.security.core.Authentication
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Service
 class FileService(private val fileRepository: FileRepository,
