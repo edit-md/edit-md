@@ -28,7 +28,7 @@ class FileController(private val fileService: FileService) {
         return ResponseEntity.ok(presignedUrl)
     }
 
-    @GetMapping
+    @GetMapping("/")
     fun getAllFilesFromDocument(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<List<FileDtoOut>> {
         val files = fileService.getAllFilesFromDocument(documentId, authentication)
         return ResponseEntity.ok(files.map{FileDtoOut(it)})
@@ -72,7 +72,7 @@ class FileController(private val fileService: FileService) {
             writer.close()
         }
 
-        // Upload the file
+        // Upload file
         val command = arrayOf(
             "curl",
             "-X", "PUT",

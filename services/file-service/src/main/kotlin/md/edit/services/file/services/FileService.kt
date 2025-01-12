@@ -6,7 +6,6 @@ import md.edit.services.file.repos.FileRepository
 import org.springframework.stereotype.Service
 import md.edit.services.file.data.File
 import md.edit.services.file.exceptions.DocumentNotFoundException
-import md.edit.services.file.exceptions.NoPermissionException
 import md.edit.services.file.exceptions.UploadedFileNotFoundException
 import md.edit.services.file.repos.FileMetadataRepository
 import md.edit.services.file.utils.AuthorizationUtils
@@ -19,43 +18,37 @@ class FileService(private val fileRepository: FileRepository,
                   private val documentService: DocumentService) {
 
     fun getFileInformation(fileId: UUID, authentication: Authentication): File {
-        val user = AuthorizationUtils.onlyUser(authentication)
 
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
 
         val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
 
-        if(!documentService.checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.READ)) {
-            throw NoPermissionException()
-        }
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
 
         return file
     }
 
     fun generatePresignedDownloadUrl(fileId: UUID, authentication: Authentication): String {
-        val user = AuthorizationUtils.onlyUser(authentication)
 
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
 
         val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
 
-        if(!documentService.checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.READ) && document.visibility != DocumentVisibility.PUBLIC) {
-            throw NoPermissionException()
-        }
+        if(document.visibility == DocumentVisibility.PRIVATE)
+            AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
+        else
+            AuthorizationUtils.onlyUser(authentication)
 
         return fileRepository.generatePresignedDownloadUrl(file.path)
     }
 
     fun getAllFilesFromDocument(documentId: UUID, authentication: Authentication): List<File> {
-        val user = AuthorizationUtils.onlyUser(authentication)
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
 
-        if(!documentService.checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.READ)) {
-            throw NoPermissionException()
-        }
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
 
         val files = metadataRepository.findByDocumentId(documentId)
 
@@ -63,29 +56,22 @@ class FileService(private val fileRepository: FileRepository,
     }
 
     fun generatePresignedUploadUrl(documentId: UUID, authentication: Authentication): String {
-        val user = AuthorizationUtils.onlyUser(authentication)
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
 
-        if(!documentService.checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.WRITE)) {
-            throw NoPermissionException()
-        }
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
         return fileRepository.generatePresignedUploadUrl()
     }
 
     fun deleteFile(fileId: UUID, authentication: Authentication){
 
-        val user = AuthorizationUtils.onlyUser(authentication)
-
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
 
         val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
 
-        if(!documentService.checkIfUserHasPermissionOnDocument(user, document, DocumentPermission.WRITE)) {
-            throw NoPermissionException()
-        }
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
         fileRepository.deleteFile(file.path)
         metadataRepository.deleteById(fileId)

@@ -1,9 +1,8 @@
 package md.edit.services.file.services
 
-import md.edit.services.file.configuration.cookieauth.CustomUserDetails
 import md.edit.services.file.data.DocumentPermission
 import md.edit.services.file.dtos.DocumentDataDto
-import md.edit.services.file.dtos.DocumentUserDto
+import md.edit.services.file.exceptions.DocumentNotFoundException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -40,17 +39,23 @@ class DocumentService(private val restTemplate: RestTemplate) {
         }
     }
 
-    fun getPermissionOfSharedUser(sharedUsers: MutableList<DocumentUserDto>?, id: UUID): DocumentPermission? {
-        if (sharedUsers != null) {
-            for (user in sharedUsers)
-                if (user.userId == id)
-                    return user.permission
+    fun getUsersWithPermission(documentId: UUID, permission: DocumentPermission): Array<UUID> {
+        val document = fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
+        val userList = mutableListOf<UUID>()
+        userList.add(document.owner)
+
+        if(permission == DocumentPermission.READ){
+            for(user in document.shared ?: emptyList()){
+                userList.add(user.userId)
+            }
+        } else{
+            for(user in document.shared ?: emptyList()){
+                if(user.permission == DocumentPermission.WRITE){
+                    userList.add(user.userId)
+                }
+            }
         }
 
-        return null
-    }
-
-    fun checkIfUserHasPermissionOnDocument(user: CustomUserDetails, document: DocumentDataDto, permission: DocumentPermission): Boolean {
-        return (user.id == document.owner || getPermissionOfSharedUser(document.shared, user.id) == permission)
+        return userList.toTypedArray()
     }
 }
