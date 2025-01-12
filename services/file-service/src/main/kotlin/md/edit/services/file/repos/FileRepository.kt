@@ -3,6 +3,7 @@ package md.edit.services.file.repos
 import io.minio.*
 import io.minio.errors.MinioException
 import io.minio.http.Method
+import md.edit.services.file.exceptions.MinIOException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Repository
 import java.io.IOException
@@ -25,7 +26,7 @@ class FileRepository(private val minioClient: MinioClient) {
                     .build()
             )
         } catch (e: MinioException) {
-            throw IOException("Error during fetch from MinIO: ${e.message}", e)
+            throw MinIOException()
         }
     }
 
@@ -41,7 +42,7 @@ class FileRepository(private val minioClient: MinioClient) {
                     .build()
             )
         } catch (e: MinioException) {
-            throw IOException("Error from MinIO: ${e.message}", e)
+            throw MinIOException()
         }
     }
 
@@ -54,7 +55,7 @@ class FileRepository(private val minioClient: MinioClient) {
                     .build()
             )
         } catch (e: MinioException) {
-            throw IOException("Error during delete from MinIO: ${e.message}", e)
+            throw MinIOException()
         }
     }
 }

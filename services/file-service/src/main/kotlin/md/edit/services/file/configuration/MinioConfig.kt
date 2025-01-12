@@ -11,20 +11,24 @@ import io.minio.MakeBucketArgs
 @Configuration
 class MinioConfig {
 
-    @Value("\${minio.url}")
-    lateinit var endpoint: String
+    @Value("\${minio.internal-url}")
+    private lateinit var internalEndpoint: String
+
+    @Value("\${minio.public-url}")
+    private lateinit var publicEndpoint: String
 
     @Value("\${minio.access-key}")
-    lateinit var accessKey: String
+    private lateinit var accessKey: String
 
     @Value("\${minio.secret-key}")
-    lateinit var secretKey: String
+    private lateinit var secretKey: String
 
     @Value("\${minio.bucket-name}")
-    lateinit var bucketName: String
+    private lateinit var bucketName: String
 
     @Bean
     fun minioClient(): MinioClient {
+        val endpoint = publicEndpoint.ifBlank { internalEndpoint }
         val minioClient = MinioClient.builder()
             .endpoint(endpoint)
             .credentials(accessKey, secretKey)

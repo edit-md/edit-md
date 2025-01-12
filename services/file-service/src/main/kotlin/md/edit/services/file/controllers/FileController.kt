@@ -49,49 +49,4 @@ class FileController(private val fileService: FileService) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
         }
     }
-
-    // Endpoint only for testing purposes
-    @PostMapping("/upload")
-    fun uploadFile(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<String> {
-
-        val fileName = "example.txt"
-
-        // Make new File and URL
-        val presignedUrl : String = fileService.generatePresignedUploadUrl(documentId, authentication)
-        val file = File(fileName)
-        file.createNewFile()
-
-        // Write something in the file
-        val writer = FileWriter(file)
-        try {
-            writer.write("I was born on the cemetery\n")
-            writer.write("Under the sign of the moon")
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally{
-            writer.close()
-        }
-
-        // Upload file
-        val command = arrayOf(
-            "curl",
-            "-X", "PUT",
-            "--upload-file", fileName,
-            presignedUrl
-        )
-
-        try {
-
-            val processBuilder = ProcessBuilder(*command)
-            val process = processBuilder.start()
-
-
-            val exitCode = process.waitFor()
-            return ResponseEntity.ok("Prozess beendet mit Code: $exitCode")
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
-
-        return ResponseEntity(HttpStatus.CONFLICT)
-    }
 }
