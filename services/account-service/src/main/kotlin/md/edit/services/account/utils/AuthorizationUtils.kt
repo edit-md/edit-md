@@ -15,7 +15,6 @@ class AuthorizationUtils {
             if(auth !is ApiKeyAuthentication) {
                 throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "This endpoint is only available for API requests")
             }
-
             return auth
         }
 
@@ -25,7 +24,6 @@ class AuthorizationUtils {
             if(principal !is CustomOAuth2User) {
                 throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "This endpoint is only available for authenticated users")
             }
-
             return principal
         }
 
@@ -36,10 +34,11 @@ class AuthorizationUtils {
             if(user.id != uuid) {
                 throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource")
             }
-
             return user
         }
 
+        fun isAPI(auth: Authentication): Boolean {
+            return auth is ApiKeyAuthentication
+        }
     }
-
 }

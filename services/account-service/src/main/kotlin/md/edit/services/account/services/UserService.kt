@@ -1,13 +1,13 @@
 package md.edit.services.account.services
 
-import md.edit.services.account.configuration.oauth.CustomOAuth2User
 import md.edit.services.account.configuration.oauth.CustomOAuth2UserRequest
-import md.edit.services.account.data.ConnectedAccount
-import md.edit.services.account.data.ConnectedAccountId
-import md.edit.services.account.data.User
-import md.edit.services.account.data.UserSettings
+import md.edit.services.account.data.*
+import md.edit.services.account.exceptions.AuthorizationException
+import md.edit.services.account.exceptions.UserNotFoundException
 import md.edit.services.account.repos.ConnectedAccountRepository
 import md.edit.services.account.repos.UserRepository
+import md.edit.services.account.utils.AuthorizationUtils
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -22,7 +22,7 @@ class UserService(
 
     /**
      * Gets a user and updates it if it exists, otherwise creates a new user
-     * @param oAuth2User OAuth2 user
+     * @param request OAuth2UserRequest
      * @return User
      */
     @Transactional
@@ -66,13 +66,19 @@ class UserService(
         val remoteId = request.remoteId
 
         // get user from database
-        return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }
-            .orElse(null)
+        return connectedAccountRepository.findById(ConnectedAccountId(accountOrigin, remoteId)).map { it.user }.orElse(null)
     }
 
+    /**
+     * Gets a user by Authentication
+     * @param authentication Authentication
+     * @return User
+     */
+
     @Transactional
-    fun getUser(oAuth2User: CustomOAuth2User): User? {
-        return userRepository.findById(oAuth2User.id).map { it }.orElse(null)
+    fun getUser(authentication: Authentication): User {
+        val authUser = AuthorizationUtils.onlyUser(authentication)
+        return userRepository.findById(authUser.id).map { it }.orElseThrow { UserNotFoundException() }
     }
 
     /**
@@ -81,27 +87,25 @@ class UserService(
      * @return User
      */
     @Transactional
-    fun getUserById(id: UUID): User? {
-        return userRepository.findById(id).map { it }.orElse(null)
+    fun getUserById(authentication: Authentication, id: UUID): User {
+        val user = userRepository.findById(id).orElseThrow { UserNotFoundException() }
+
+        // Allow API access without further checks
+        if (AuthorizationUtils.isAPI(authentication)) return user
+
+        return user
     }
 
     @Transactional
-    fun searchNames(searchTerm: String): Collection<User> {
-        val projections = userRepository.findUsersByName(searchTerm)
-        return projections.map {
-            User(
-                id = it.id,
-                name = it.name,
-                email = it.email,
-                avatar = it.avatar,
-                settings = UserSettings.DEFAULT,
-                connectedAccounts = mutableListOf()
-            )
-        }
+    fun searchNames(authentication: Authentication, searchTerm: String): Collection<User> {
+        if (AuthorizationUtils.isAPI(authentication))
+            throw AuthorizationException()
+        return userRepository.findUsersByName(searchTerm)
     }
 
     @Transactional
-    fun updateUserSettings(user: User, newUserSettings: UserSettings): User {
+    fun updateUserSettings(authentication: Authentication, newUserSettings: UserSettings): User {
+        val user: User = getUser(authentication)
 
         // Iterate through all properties of the newUserSettings object
         for (property in newUserSettings::class.declaredMemberProperties) {
