@@ -44,5 +44,8 @@
 		"overrides": {
 			"cookie": "^0.7.0"
 		}
+	},
+	"dependencies": {
+		"@shopify/semaphore": "^3.1.0"
 	}
 }

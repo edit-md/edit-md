@@ -18,7 +18,11 @@ class AuthorizationUtils {
             return auth
         }
 
-        fun onlyUser(auth: Authentication): CustomUserDetails {
+        fun onlyUser(auth: Authentication?): CustomUserDetails {
+            if(auth == null) {
+                throw AuthorizationException()
+            }
+
             val principal = auth.principal
 
             if(principal !is CustomUserDetails) {
@@ -28,7 +32,7 @@ class AuthorizationUtils {
             return principal
         }
 
-        fun onlyUser(auth: Authentication, uuid: UUID): CustomUserDetails {
+        fun onlyUser(auth: Authentication?, uuid: UUID): CustomUserDetails {
             val user = onlyUser(auth)
 
             if(user.id != uuid) {
@@ -38,7 +42,7 @@ class AuthorizationUtils {
             return user
         }
 
-        fun onlyUsers(auth: Authentication, vararg uuids: UUID): CustomUserDetails {
+        fun onlyUsers(auth: Authentication?, vararg uuids: UUID): CustomUserDetails {
             val user = onlyUser(auth)
 
             if(user.id !in uuids) {
@@ -48,7 +52,7 @@ class AuthorizationUtils {
             return user
         }
 
-        fun isAPI(auth: Authentication): Boolean {
+        fun isAPI(auth: Authentication?): Boolean {
             return auth is ApiKeyAuthentication
         }
 

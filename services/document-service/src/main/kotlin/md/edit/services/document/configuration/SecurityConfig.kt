@@ -6,6 +6,8 @@ import md.edit.services.document.configuration.csrf.CsrfFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -14,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsUtils
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+
 
 @Configuration
 @EnableWebSecurity
@@ -58,7 +61,7 @@ class SecurityConfig(
 
         http.authorizeHttpRequests {
             it.requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-            it.anyRequest().authenticated()
+            it.anyRequest().permitAll()
         }
 
         http.exceptionHandling {
@@ -74,5 +77,12 @@ class SecurityConfig(
         http.logout{ it.disable() }
 
         return http.build()
+    }
+
+    @Bean
+    fun noopAuthenticationManager(): AuthenticationManager {
+        return AuthenticationManager {
+            throw AuthenticationServiceException("Authentication is disabled")
+        }
     }
 }

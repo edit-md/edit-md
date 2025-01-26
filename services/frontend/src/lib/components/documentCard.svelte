@@ -22,8 +22,8 @@
 		return () => clearInterval(interval);
 	});
 
-	let lastModifiedDate = $derived(new Date(document.lastModified));
-	let everModified = $derived(lastModifiedDate == new Date(0));
+	let lastModifiedDate = new Date(document.lastModified);
+	let everModified = $derived(lastModifiedDate.getTime() !== new Date(0).getTime());
 
 	let lastModifiedDateString = $derived.by(() => {
 		currentDate;
@@ -46,6 +46,8 @@
 			await invalidateAll();
 		}
 	}
+
+	console.log(document);
 </script>
 
 <div class="overflow-clip rounded-md border border-foreground-20">

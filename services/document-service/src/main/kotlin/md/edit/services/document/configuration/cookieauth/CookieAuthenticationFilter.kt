@@ -23,7 +23,7 @@ class CookieAuthenticationFilter(
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
 
-        if(request !is HttpServletRequest || response !is HttpServletResponse) {
+        if (request !is HttpServletRequest || response !is HttpServletResponse) {
             chain.doFilter(request, response)
             return
         }
@@ -33,18 +33,18 @@ class CookieAuthenticationFilter(
         if (authCookie != null) {
             val token = authCookie.value
             try {
-                val user = cookieAuthenticationService.fetchUserData(token)
-                if (user != null) {
-                    val userDetails = CustomUserDetails(user)
+                val user = cookieAuthenticationService.fetchUserData(token) ?: throw Exception("User not found")
 
-                    val authentication = UsernamePasswordAuthenticationToken(
-                        userDetails, null, null
-                    ).apply {
-                        details = WebAuthenticationDetailsSource().buildDetails(request)
-                    }
+                val userDetails = CustomUserDetails(user)
 
-                    SecurityContextHolder.getContext().authentication = authentication
+                val authentication = UsernamePasswordAuthenticationToken(
+                    userDetails, null, null
+                ).apply {
+                    details = WebAuthenticationDetailsSource().buildDetails(request)
                 }
+
+                SecurityContextHolder.getContext().authentication = authentication
+
             } catch (e: Exception) {
                 response.status = HttpServletResponse.SC_UNAUTHORIZED
                 response.contentType = "application/json"
@@ -58,7 +58,7 @@ class CookieAuthenticationFilter(
     }
 
     private fun getAuthCookie(request: HttpServletRequest): Cookie? {
-        return request.cookies?.firstOrNull { it.name == sessionCookieName}
+        return request.cookies?.firstOrNull { it.name == sessionCookieName }
     }
 }
 
