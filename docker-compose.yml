@@ -10,13 +10,14 @@ services:
         environment:
             - ACCOUNT_SERVICE=http://account-service:8080
             - FRONTEND_SERVICE=http://frontend:5173
-            - FILE_SERVICE=http://localhost
+            - FILE_SERVICE=http://file-service:8080
             - DOCUMENT_SERVICE=http://document-service:8080
         networks:
             - nginx-net
         depends_on:
             - account-service
             - document-service
+            - file-service
 
     # Account service
     accounts-sessions-db:
@@ -134,7 +135,84 @@ services:
             retries: 5
         networks:
             - document-service-net
+            
+    # File service
+    file-service:
+        build:
+            context: ./services/file-service
+            target: dev
+        restart: always
+        ports:
+            - "8080:8080"
+        environment:
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://file-db:5432/${FILE_DB_NAME}
+            - SPRING_DATASOURCE_USERNAME=${FILE_DB_USER}
+            - SPRING_DATASOURCE_PASSWORD=${FILE_DB_PASSWORD}
+            - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL}
+            - MINIO_INTERNAL_URL=${MINIO_INTERNAL_URL}
+            - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+            - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+            - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+            - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
+            - EDITMD_DOMAIN=${EDITMD_DOMAIN}
+            - EDITMD_API_KEY=${EDITMD_API_KEY}
+            - EDITMD_DOCUMENT_SERVICE_HOST=http://document-service:8080
+            - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
+        depends_on:
+            - minio
+            - file-db
+        networks:
+            - nginx-net
+            - file-service-net
+        develop:
+            watch:
+                - path: ./services/file-service/src  # Watch for changes in the source folder
+                  action: sync  # Sync the changes
+                  target: /app/src  # Sync to container's source directory
+                - path: ./services/file-service/pom.xml  # Watch for changes in pom.xml
+                  action: rebuild
 
+    file-db:
+        image: postgres:17.2
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_DB=${FILE_DB_NAME}
+            - POSTGRES_USER=${FILE_DB_USER}
+            - POSTGRES_PASSWORD=${FILE_DB_PASSWORD}
+        volumes:
+            - file-db:/var/lib/postgresql/data
+            - ./dev/db/files/init:/docker-entrypoint-initdb.d
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U ${FILE_DB_USER}" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - file-service-net
+
+    minio:
+        image: quay.io/minio/minio
+        container_name: minio
+        ports:
+            - "9000:9000"
+            - "9090:9090"
+        volumes:
+            - minio-data:/data
+        environment:
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+        command:
+            server /data --console-address ":9090"
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live" ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+        networks:
+            - file-service-net
+    
     # Frontend service
     frontend:
         build:
@@ -163,6 +241,8 @@ services:
 volumes:
     accounts-db:
     document-db:
+    file-db:
+    minio-data:
 
 networks:
     nginx-net:
@@ -170,4 +250,6 @@ networks:
     account-service-net:
         driver: bridge
     document-service-net:
+        driver: bridge
+    file-service-net:
         driver: bridge

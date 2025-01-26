@@ -14,5 +14,6 @@
   <modules>
     <module>services/account-service</module>
     <module>services/document-service</module>
+    <module>services/file-service</module>
   </modules>
 </project>
