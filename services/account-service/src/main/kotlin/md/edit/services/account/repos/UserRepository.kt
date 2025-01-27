@@ -13,6 +13,7 @@ interface UserRepository : JpaRepository<User, UUID> {
         value = """
             SELECT *
             FROM users
+            WHERE similarity(name, :searchTerm) > 0.3
             ORDER BY similarity(name, :searchTerm) DESC
             LIMIT 10;
         """,
