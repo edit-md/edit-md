@@ -1,0 +1,37 @@
+name: Build Docker Images on Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build document-service
+        run: |
+          docker build --tag document-service:latest ./services/document-service
+
+      - name: Build account-service
+        run: |
+          docker build --tag account-service:latest ./services/account-service
+
+      - name: Build file-service
+        run: |
+          docker build --tag file-service:latest ./services/file-service
+
+      - name: Build frontend
+        run: |
+          docker build --tag frontend:latest ./services/frontend
