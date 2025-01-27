@@ -22,6 +22,6 @@
 		bind:value={data.value}
 		class="h-input {data.error
 			? 'border-red-500'
-			: 'border-foreground-10'}  z-10 w-full rounded-md border bg-background px-4 py-2 outline-none transition-all hover:bg-background-alt focus:bg-background-alt focus:outline-none"
+			: 'border-foreground-10'} z-10 w-full rounded-md border bg-background px-4 py-2 outline-none transition-all hover:bg-background-alt focus:bg-background-alt focus:outline-none"
 	/>
 </div>

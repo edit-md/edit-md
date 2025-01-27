@@ -2,6 +2,7 @@ package md.edit.services.document.services
 
 import md.edit.services.document.data.*
 import md.edit.services.document.exceptions.DocumentNotFoundException
+import md.edit.services.document.exceptions.InvalidArgumentException
 import md.edit.services.document.exceptions.UserNotFoundException
 import md.edit.services.document.repos.DocumentChangeRepository
 import md.edit.services.document.repos.DocumentRepository
@@ -198,6 +199,10 @@ class DocumentService(
         // Check access (API clients bypass, others must be the owner)
         if (!AuthorizationUtils.isAPI(authentication)) {
             AuthorizationUtils.onlyUser(authentication, document.owner)
+        }
+
+        if(userId == document.owner) {
+            throw InvalidArgumentException("Cannot share document with owner")
         }
 
         val documentUser = DocumentUser(DocumentUserId(document, userId), document, permission)

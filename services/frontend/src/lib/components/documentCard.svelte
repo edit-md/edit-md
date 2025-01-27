@@ -6,6 +6,7 @@
 	import { getRelativeTimeString } from '$lib/timeUtils';
 	import { DropdownMenu } from 'bits-ui';
 	import { onMount } from 'svelte';
+	import ShareDocumentDialog from './shareDocumentDialog.svelte';
 
 	let { document } = $props();
 
@@ -42,39 +43,42 @@
 			}
 		});
 
-		if(resp.ok) {
+		if (resp.ok) {
 			await invalidateAll();
 		}
 	}
 
 	console.log(document);
+
+	let shareDialogOpen = $state(false);
 </script>
 
-<div class="overflow-clip rounded-md border border-foreground-20">
+<div class="border-foreground-20 overflow-clip rounded-md border">
 	<div class="px-3 pb-2 pt-1">
 		<div class="relative">
 			<h1 class="truncate text-xl font-bold">{document.title}</h1>
 			{#if !everModified}
-				<p class="text-sm text-foreground-50">Created {createdDateString}</p>
+				<p class="text-foreground-50 text-sm">Created {createdDateString}</p>
 			{:else}
-				<p class="text-sm text-foreground-50">Edited {lastModifiedDateString}</p>
+				<p class="text-foreground-50 text-sm">Edited {lastModifiedDateString}</p>
 			{/if}
 		</div>
 	</div>
-	<div class="flex items-stretch justify-between border-t border-foreground-20">
+	<div class="border-foreground-20 flex items-stretch justify-between border-t">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
-				class="flex w-fit items-center justify-center border-r border-foreground-20 px-3 hover:bg-foreground-20"
+				class="border-foreground-20 hover:bg-foreground-20 flex w-fit items-center justify-center border-r px-3"
 			>
 				<IconKebabVertical class="h-4 w-4" />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content
-				class="w-full max-w-[150px] rounded-lg border border-foreground-20 bg-background px-1 py-[5px] shadow-popover"
+				class="border-foreground-20 bg-background shadow-popover w-full max-w-[150px] rounded-lg border px-1 py-[5px]"
 				sideOffset={2}
 				align="start"
 			>
 				<DropdownMenu.Item
-					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
+					class="data-[highlighted]:bg-foreground-20 flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent"
+					onclick={() => (shareDialogOpen = true)}
 				>
 					<div class="flex items-center gap-2">
 						<IconShare class="h-4 w-4" />
@@ -82,7 +86,7 @@
 					</div>
 				</DropdownMenu.Item>
 				<DropdownMenu.Item
-					class="flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent data-[highlighted]:bg-foreground-20"
+					class="data-[highlighted]:bg-foreground-20 flex h-10 select-none items-center rounded-md py-3 pl-3 pr-1.5 text-sm !ring-0 !ring-transparent"
 					onclick={deleteDocument}
 				>
 					<div class="flex items-center gap-2">
@@ -93,10 +97,11 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 		<button
-			class="flex items-center justify-center border-l border-foreground-20 px-4 py-2 hover:bg-foreground-20"
+			class="border-foreground-20 hover:bg-foreground-20 flex items-center justify-center border-l px-4 py-2"
 			onclick={editDocument}
 		>
 			Edit
 		</button>
 	</div>
+	<ShareDocumentDialog bind:dialogOpen={shareDialogOpen} {document} />
 </div>
