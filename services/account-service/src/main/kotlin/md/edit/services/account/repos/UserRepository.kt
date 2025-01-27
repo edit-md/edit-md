@@ -13,11 +13,12 @@ interface UserRepository : JpaRepository<User, UUID> {
         value = """
             SELECT *
             FROM users
-            WHERE similarity(name, :searchTerm) > 0.3
+            WHERE id != :id 
+            AND similarity(name, :searchTerm) > 0.3
             ORDER BY similarity(name, :searchTerm) DESC
             LIMIT 10;
         """,
         nativeQuery = true
     )
-    fun findUsersByName(searchTerm: String): Collection<User>
+    fun findUsersByName(searchTerm: String, id: UUID?): Collection<User>
 }
