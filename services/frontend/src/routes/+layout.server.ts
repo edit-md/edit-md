@@ -1,12 +1,15 @@
 import { fetchProxy, SessionError } from '$lib/fetchLib';
 import type { LayoutServerLoad } from './$types';
+import {env} from "$env/dynamic/private";
 
 export const load: LayoutServerLoad = async (req) => {
 	try {
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 500);
 
-		let resp = await fetchProxy(req, 'http://account-service:8080/api/accounts/me', {
+		const host = env.EDITMD_ACCOUNT_SERVICE_HOST;
+
+		let resp = await fetchProxy(req, host + '/api/accounts/me', {
 			signal: controller.signal
 		});
 
