@@ -20,6 +20,9 @@ class DocumentDTO(document: Document) {
     var content: String? = null
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    var revision: ULong? = null
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     var shared: MutableList<DocumentUserDTO>? = null
 }
 
@@ -32,6 +35,7 @@ fun Document.toDTO(withShared: Boolean = false, withContent: Boolean = false): D
 
     if (withContent) {
         documentDto.content = this.data!!.content
+        documentDto.revision = this.data!!.revision
     }
 
     return documentDto

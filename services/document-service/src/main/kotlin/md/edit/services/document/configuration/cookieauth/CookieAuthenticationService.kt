@@ -14,7 +14,7 @@ class CookieAuthenticationService(private val restTemplate: RestTemplate) {
     private lateinit var accountServiceHost: String
 
     @Value("\${edit-md.session.cookie.name}")
-    private lateinit var sessionCookieName: String
+    lateinit var sessionCookieName: String
 
     fun fetchUserData(sessionToken: String): UserDataDTO? {
         val url = "$accountServiceHost/api/accounts/me"

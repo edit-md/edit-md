@@ -22,6 +22,12 @@ class CsrfFilter: Filter {
         val httpRequest = request as HttpServletRequest
         val httpResponse = response as HttpServletResponse
 
+        // Check if the request is a web socket request
+        if(httpRequest.getHeader("Upgrade") == "websocket") {
+            chain.doFilter(httpRequest, httpResponse)
+            return
+        }
+
         // Allow preflight requests
         if(httpRequest.method == "OPTIONS") {
             chain.doFilter(httpRequest, httpResponse)

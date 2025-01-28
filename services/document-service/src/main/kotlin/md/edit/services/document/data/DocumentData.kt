@@ -17,6 +17,8 @@ data class DocumentData(
     @JoinColumn(name = "id")
     var document: Document,
 
+    var revision: ULong = 0u,
+
     @Temporal(TemporalType.TIMESTAMP)
     var lastModified: Date = Date.from(Instant.EPOCH)
 ) {

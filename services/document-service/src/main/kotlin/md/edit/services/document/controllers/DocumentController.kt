@@ -14,7 +14,7 @@ class DocumentController(
     private val documentService: DocumentService
 ) {
     @GetMapping("/")
-    fun getDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
+    fun getDocuments(authentication: Authentication?): ResponseEntity<Collection<DocumentDTO>> {
         // ToDo: Add Pagination
         val documents = documentService.getDocuments(authentication)
         return ResponseEntity.ok(documents.map { it.toDTO() }.toList())
@@ -22,7 +22,7 @@ class DocumentController(
 
     @PostMapping("/")
     fun createDocument(
-        authentication: Authentication,
+        authentication: Authentication?,
         @Valid @RequestBody data: DocumentCreateDTO
     ): ResponseEntity<DocumentDTO> {
         val document = documentService.createDocument(
@@ -35,26 +35,26 @@ class DocumentController(
     }
 
     @GetMapping("/shared")
-    fun getSharedDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
+    fun getSharedDocuments(authentication: Authentication?): ResponseEntity<Collection<DocumentDTO>> {
         val documents = documentService.getSharedDocuments(authentication)
         return ResponseEntity.ok(documents.map { it.toDTO() }.toList())
     }
 
     @GetMapping("/owned")
-    fun getOwnedDocuments(authentication: Authentication): ResponseEntity<Collection<DocumentDTO>> {
+    fun getOwnedDocuments(authentication: Authentication?): ResponseEntity<Collection<DocumentDTO>> {
         val documents = documentService.getOwnedDocuments(authentication)
         return ResponseEntity.ok(documents.map { it.toDTO() }.toList())
     }
 
     @GetMapping("/{id}")
-    fun getDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
+    fun getDocument(authentication: Authentication?, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
         val document = documentService.getDocument(authentication, id)
-        return ResponseEntity.ok(document.toDTO(withShared = true, withContent = true))
+        return ResponseEntity.ok(document.toDTO(withContent = true))
     }
 
     @PatchMapping("/{id}")
     fun updateDocument(
-        authentication: Authentication,
+        authentication: Authentication?,
         @PathVariable id: UUID,
         @Valid @RequestBody data: DocumentPatchDTO
     ): ResponseEntity<DocumentDTO> {
@@ -63,14 +63,14 @@ class DocumentController(
     }
 
     @DeleteMapping("/{id}")
-    fun deleteDocument(authentication: Authentication, @PathVariable id: UUID): ResponseEntity<Unit> {
+    fun deleteDocument(authentication: Authentication?, @PathVariable id: UUID): ResponseEntity<Unit> {
         documentService.deleteDocument(authentication, id)
         return ResponseEntity.ok().build()
     }
 
     @GetMapping("/{id}/share")
     fun getSharedUsers(
-        authentication: Authentication,
+        authentication: Authentication?,
         @PathVariable id: UUID
     ): ResponseEntity<Collection<DocumentUserDTO>> {
         val sharedUsers = documentService.getSharedUsers(authentication, id)
@@ -79,7 +79,7 @@ class DocumentController(
 
     @PutMapping("/{id}/share")
     fun shareDocument(
-        authentication: Authentication,
+        authentication: Authentication?,
         @PathVariable id: UUID,
         @RequestBody data: DocumentUserInDTO
     ): ResponseEntity<DocumentUserDTO> {
@@ -89,7 +89,7 @@ class DocumentController(
 
     @DeleteMapping("/{id}/share/{userId}")
     fun unshareDocument(
-        authentication: Authentication,
+        authentication: Authentication?,
         @PathVariable id: UUID,
         @PathVariable userId: UUID
     ): ResponseEntity<Unit> {
@@ -99,7 +99,7 @@ class DocumentController(
 
     @GetMapping("/search")
     fun getDocumentsByTitle(
-        authentication: Authentication,
+        authentication: Authentication?,
         @RequestParam title: String
     ): ResponseEntity<Collection<DocumentDTO>> {
         return ResponseEntity.ok(documentService.searchTitles(authentication, title).map
