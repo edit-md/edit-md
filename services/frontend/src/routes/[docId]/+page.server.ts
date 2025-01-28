@@ -1,10 +1,13 @@
 import { fetchProxy, SessionError } from '$lib/fetchLib';
 import type { PageServerLoad } from './$types';
+import {env} from "$env/dynamic/private";
 
 export const load: PageServerLoad = async (req) => {
 	let data = {
 		document: undefined
 	};
+
+	const documentServiceHost = env.EDITMD_DOCUMENT_SERVICE_HOST;
 
 	try {
 		const controller = new AbortController();
@@ -12,7 +15,7 @@ export const load: PageServerLoad = async (req) => {
 
 		let resp = await fetchProxy(
 			req,
-			`http://document-service:8080/api/documents/${req.params.docId}`,
+			`${documentServiceHost}/api/documents/${req.params.docId}`,
 			{
 				signal: controller.signal
 			}
