@@ -3,3 +3,7 @@ global:
   apiKey: "CHANGE_ME"
   sessionCookie:
     secure: false
+
+ingress:
+  nginx:
+    enabled: true
