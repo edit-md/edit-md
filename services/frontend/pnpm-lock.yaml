@@ -10,6 +10,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      isomorphic-dompurify:
+        specifier: ^2.19.0
+        version: 2.19.0
     devDependencies:
       '@codemirror/commands':
         specifier: ^6.7.1
@@ -53,9 +57,6 @@ importers:
       globals:
         specifier: ^15.14.0
         version: 15.14.0
-      isomorphic-dompurify:
-        specifier: ^2.19.0
-        version: 2.19.0
       marked:
         specifier: ^15.0.4
         version: 15.0.4
