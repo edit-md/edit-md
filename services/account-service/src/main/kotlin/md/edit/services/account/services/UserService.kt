@@ -100,7 +100,8 @@ class UserService(
     fun searchNames(authentication: Authentication, searchTerm: String): Collection<User> {
         if (AuthorizationUtils.isAPI(authentication))
             throw AuthorizationException()
-        return userRepository.findUsersByName(searchTerm)
+        val user: User = getUser(authentication)
+        return userRepository.findUsersByName(searchTerm, user.id)
     }
 
     @Transactional
