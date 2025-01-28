@@ -40,14 +40,12 @@
 		"vite": "^5.4.11"
 	},
 	"dependencies": {
-		"isomorphic-dompurify": "^2.19.0"
+		"isomorphic-dompurify": "^2.19.0",
+		"@shopify/semaphore": "^3.1.0"
 	},
 	"pnpm": {
 		"overrides": {
 			"cookie": "^0.7.0"
 		}
-	},
-	"dependencies": {
-		"@shopify/semaphore": "^3.1.0"
 	}
 }
