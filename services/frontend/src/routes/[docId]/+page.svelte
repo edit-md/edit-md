@@ -17,8 +17,6 @@
 	let loggedIn = $state(data.user !== undefined);
 	let user = $state(data.user);
 
-	console.log(data.document);
-
 	let documentState = $state({
 		title: data.document?.title || 'Untitled',
 		content: data.document?.content || '',

@@ -28,8 +28,6 @@
         //foundUsers = foundUsers.filter((user) => !users.find((u) => u.id === user.id));
 
         users = foundUsers;
-
-        console.log(users);
     }
 </script>
 

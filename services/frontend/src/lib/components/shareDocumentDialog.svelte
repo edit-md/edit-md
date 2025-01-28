@@ -20,7 +20,7 @@
         }
 	});
 
-	const themes = [
+	const permissions = [
 		{ value: 'READ', label: 'Read' },
 		{ value: 'WRITE', label: 'Write' }
 	];
@@ -65,6 +65,27 @@
         }
     }
 
+	async function removeShare(userId: string) {
+		let resp = await fetch(`/api/documents/${document.id}/share/${userId}`, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRF-Protection': '1'
+			},
+			body: JSON.stringify({
+				userId: formData.userId.value
+			})
+		});
+
+		if (resp.ok) {
+			console.log(await resp.json());
+			await loadDocumentShares();
+		} else {
+			const data = await resp.text();
+			console.error('Failed to remove share', resp, data);
+		}
+	}
+
 	$effect(() => {
 		if (dialogOpen) {
 			loadDocumentShares();
@@ -90,7 +111,7 @@
 			<div class="mt-[-5px] flex flex-col items-start">
 				<div class="flex w-full gap-2  px-4 py-4">
 					<SearchUserBox bind:data={formData.userId} />
-					<Select.Root items={themes} bind:selected={formData.permission}>
+					<Select.Root items={permissions} bind:selected={formData.permission}>
 						<Select.Trigger
 							class="h-input border-foreground-10 bg-background hover:bg-background-alt focus:bg-background-alt flex w-48 items-center gap-2 rounded-md border px-4 py-2 outline-none transition-all focus:outline-none"
 							aria-label="Permission"
@@ -102,13 +123,13 @@
 							class="border-muted bg-background shadow-popover w-full rounded-md border p-1 outline-none"
 							sideOffset={8}
 						>
-							{#each themes as theme}
+							{#each permissions as permission}
 								<Select.Item
 									class="data-[highlighted]:bg-muted flex h-10 w-full select-none items-center rounded-md py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
-									value={theme.value}
-									label={theme.label}
+									value={permission.value}
+									label={permission.label}
 								>
-									{theme.label}
+									{permission.label}
 									<Select.ItemIndicator class="ml-auto" asChild={false}></Select.ItemIndicator>
 								</Select.Item>
 							{/each}
@@ -124,7 +145,17 @@
 				</div>
                 <div class="flex w-full flex-col gap-2 px-4 py-4">
                 {#each sharedUsers as sharedUser}
-                    <UserCard userId={sharedUser.id} />
+					<div class="flex items-center gap-2 justify-between">
+						<UserCard userId={sharedUser.id} />
+						<div class="flex gap-2 items-center">
+							<span class="capitalize">{sharedUser.permission.toLocaleLowerCase()}</span>
+							<IconClose class="cursor-pointer hover:bg-red-500 h-5 w-5 rounded-md transition-all duration-150" onclick={
+								() => {
+									removeShare(sharedUser.id);
+								}
+							}/>
+						</div>
+					</div>
                 {/each}
                 {#if sharedUsers.length === 0}
                     <p class="text-foreground-50 text-sm text-center">No users shared</p>

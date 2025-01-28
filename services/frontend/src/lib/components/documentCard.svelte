@@ -48,8 +48,6 @@
 		}
 	}
 
-	console.log(document);
-
 	let shareDialogOpen = $state(false);
 </script>
 
