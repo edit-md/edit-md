@@ -1,0 +1,73 @@
+{{- if .Values.ingress.traefik.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-https-redirect
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-add-trailing-slash
+spec:
+  redirectRegex:
+    regex: ^(.*/[^/\.]+[^/])$
+    replacement: ${1}/
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-traefik-ingressroute
+spec:
+  entryPoints:
+    - {{ .Values.ingress.traefik.entryPoints.websecure }}
+    - {{ .Values.ingress.traefik.entryPoints.web }}
+  routes:
+  - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/`)
+    kind: Rule
+    entryPoints:
+      - {{ .Values.ingress.traefik.entryPoints.web }}
+    middlewares:
+      - name: {{ .Release.Name }}-https-redirect
+    services: []
+  - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/api/accounts`, `/api/accounts/`)
+    kind: Rule
+    entryPoints:
+      - {{ .Values.ingress.traefik.entryPoints.websecure }}
+    middlewares:
+      - name: {{ .Release.Name }}-add-trailing-slash
+    services:
+      - name: {{ .Values.services.account.name }}
+        port: {{ .Values.services.account.port }}
+  - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/api/documents`, `/api/documents/`)
+    kind: Rule
+    entryPoints:
+      - {{ .Values.ingress.traefik.entryPoints.websecure }}
+    middlewares:
+      - name: {{ .Release.Name }}-add-trailing-slash
+    services:
+      - name: {{ .Values.services.document.name }}
+        port: {{ .Values.services.document.port }}
+  - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/api/files`, `/api/files/`)
+    kind: Rule
+    entryPoints:
+      - {{ .Values.ingress.traefik.entryPoints.websecure }}
+    middlewares:
+      - name: {{ .Release.Name }}-add-trailing-slash
+    services:
+      - name: {{ .Values.services.file.name }}
+        port: {{ .Values.services.file.port }}
+  - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/`)
+    kind: Rule
+    entryPoints:
+      - {{ .Values.ingress.traefik.entryPoints.websecure }}
+    services:
+      - name: {{ .Values.services.frontend.name }}
+        port: {{ .Values.services.frontend.port }}
+  tls:
+    secretName: {{ .Values.ingress.tls.secretName }}
+{{- end }}

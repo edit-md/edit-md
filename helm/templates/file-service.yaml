@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-file-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-file-service
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-file-service
+    spec:
+      containers:
+      - name: file-service
+        image: "{{ .Values.fileService.image.repository }}:{{ .Values.fileService.image.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: {{ if .Values.filesDb.enabled }}jdbc:postgresql://{{ .Release.Name }}-files-db:5432/{{ .Values.filesDb.dbName }}{{ else }}jdbc:postgresql://{{ .Values.filesDb.external.host }}:{{ .Values.filesDb.external.port }}/{{ .Values.filesDb.dbName }}{{ end }}
+        - name: SPRING_DATASOURCE_USERNAME
+          value: {{ .Values.filesDb.user }}
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: {{ .Values.filesDb.password }}
+        - name: MINIO_INTERNAL_URL
+          value: {{ if .Values.minio.enabled }}http://{{ .Release.Name }}-files-minio:9000{{ else }}{{ .Values.minio.external.url }}{{ end }}
+        - name: MINIO_PUBLIC_URL
+          value: {{ if .Values.minio.enabled }}http://{{ .Release.Name }}-files-minio:9000{{ else }}{{ .Values.minio.external.url }}{{ end }}
+        - name: MINIO_ACCESS_KEY
+          value: {{ .Values.minio.accessKey }}
+        - name: MINIO_SECRET_KEY  
+          value: {{ .Values.minio.secretKey }}
+        - name: MINIO_BUCKET_NAME
+          value: {{ .Values.minio.bucketName }}
+        - name: EDITMD_ACCOUNT_SERVICE_HOST
+          value: http://{{ .Release.Name }}-account-service:8080
+        - name: EDITMD_DOCUMENT_SERVICE_HOST
+          value: http://{{ .Release.Name }}-document-service:8080
+        - name: EDITMD_SESSION_COOKIE
+          value: {{ .Values.global.sessionCookie.name }}
+        - name: EDITMD_DOMAIN
+          value: https://{{ .Values.global.domain }}
+        - name: EDITMD_API_KEY
+          value: {{ .Values.global.apiKey }}
+        resources:
+          {{- toYaml .Values.fileService.resources | nindent 10 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-file-service
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: {{ .Release.Name }}-file-service
+---
+{{- if .Values.fileService.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-file-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-file-service
+  minReplicas: {{ .Values.fileService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.fileService.autoscaling.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+{{- end }}

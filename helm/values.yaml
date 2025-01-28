@@ -1,0 +1,106 @@
+global:
+  domain: edit.md
+  apiKey: "CHANGE_ME"
+  sessionCookie:
+    name: "editmd-session"
+    secure: true
+
+ingress:
+  tls:
+    secretName: tls-secret
+  
+  nginx:
+    enabled: false
+  
+  traefik:
+    enabled: false
+    entryPoints:
+      web: "web"
+      websecure: "websecure"
+
+# Account Service
+accountService:
+  image:
+    repository: ghcr.io/edit-md/edit-md/account-service
+    tag: latest
+  github:
+    clientId: "CLIENT_ID"
+    clientSecret: "CLIENT_SECRET"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Document Service
+documentService:
+  image:
+    repository: ghcr.io/edit-md/edit-md/document-service
+    tag: latest
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+
+# File Service
+fileService:
+  image:
+    repository: ghcr.io/edit-md/edit-md/file-service
+    tag: latest
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+
+# Frontend
+frontend:
+  image:
+    repository: ghcr.io/edit-md/edit-md/frontend
+    tag: latest
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+
+# Databases
+accountsDb:
+  enabled: true
+  image: postgres:17.2
+  dbName: accounts
+  user: accounts
+  password: accounts
+  external: null  # {host: "", port: 5432}
+
+documentsDb:
+  enabled: true
+  image: postgres:17.2
+  dbName: documents
+  user: documents
+  password: documents
+  external: null # {host: "", port: 5432}
+
+filesDb:
+  enabled: true
+  image: postgres:17.2
+  dbName: files
+  user: files
+  password: files
+  external: null # {host: "", port: 5432}
+
+accountsSessionsDb:
+  enabled: true
+  image: bitnami/keydb:6.3.4
+  dbName: state
+  password: accounts
+  external: null  # {host: "", port: 6379}
+
+minio:
+  enabled: true
+  image: quay.io/minio/minio
+  accessKey: minio
+  secretKey: "abcdefghijk"
+  bucketName: editmd
+  external: null  # {url: ""}

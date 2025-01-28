@@ -34,3 +34,7 @@ build/
 
 ### Environment ###
 .env
+values-env.yaml
+
+### Helm ###
+/helm/files/db/
