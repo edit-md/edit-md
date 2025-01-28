@@ -7,6 +7,7 @@ import md.edit.services.file.exceptions.MinIOException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Repository
 import java.io.IOException
+import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
 @Repository
@@ -42,6 +43,21 @@ class FileRepository(private val minioClient: MinioClient) {
                     .build()
             )
         } catch (e: MinioException) {
+            throw MinIOException()
+        }
+    }
+
+    fun getInputStreamOfImage(filePath: String): InputStream {
+        try{
+            val stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(filePath)
+                    .build()
+            )
+
+            return stream
+        } catch(e: MinioException) {
             throw MinIOException()
         }
     }

@@ -6,10 +6,14 @@ import md.edit.services.file.repos.FileRepository
 import org.springframework.stereotype.Service
 import md.edit.services.file.data.File
 import md.edit.services.file.exceptions.DocumentNotFoundException
+import md.edit.services.file.exceptions.NotAnImageException
 import md.edit.services.file.exceptions.UploadedFileNotFoundException
 import md.edit.services.file.repos.FileMetadataRepository
 import md.edit.services.file.utils.AuthorizationUtils
+import org.springframework.core.io.InputStreamResource
 import org.springframework.security.core.Authentication
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 @Service
@@ -42,6 +46,26 @@ class FileService(private val fileRepository: FileRepository,
             AuthorizationUtils.onlyUser(authentication)
 
         return fileRepository.generatePresignedDownloadUrl(file.path)
+    }
+
+    fun getInputStreamOfImage(fileId: UUID, authentication: Authentication): InputStreamResource {
+        val file = metadataRepository.findById(fileId)
+            .orElseThrow { UploadedFileNotFoundException() }
+
+        if (!file.type.startsWith("image/"))
+            throw NotAnImageException()
+
+        val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
+
+        if(document.visibility == DocumentVisibility.PRIVATE)
+            AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
+        else
+            AuthorizationUtils.onlyUser(authentication)
+
+        val stream = fileRepository.getInputStreamOfImage(file.path.substring(file.path.lastIndexOf('/') + 1))
+
+        return InputStreamResource(stream)
+
     }
 
     fun getAllFilesFromDocument(documentId: UUID, authentication: Authentication): List<File> {
