@@ -6,6 +6,7 @@ import md.edit.services.file.repos.FileRepository
 import org.springframework.stereotype.Service
 import md.edit.services.file.data.File
 import md.edit.services.file.exceptions.DocumentNotFoundException
+import md.edit.services.file.exceptions.FileAlreadyUploadedException
 import md.edit.services.file.exceptions.NotAnImageException
 import md.edit.services.file.exceptions.UploadedFileNotFoundException
 import md.edit.services.file.repos.FileMetadataRepository
@@ -102,6 +103,9 @@ class FileService(private val fileRepository: FileRepository,
     fun updateUploadedStateOfFile(fileId: UUID, uploaded: Boolean, authentication: Authentication): Boolean {
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
+
+        if(file.uploaded)
+            throw FileAlreadyUploadedException()
 
         val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
 
