@@ -19,18 +19,27 @@ data class File(
     val type: String,
 
     @Column(name = "created_date", nullable = false)
-    val createdDate: java.time.LocalDateTime
+    val createdDate: java.time.LocalDateTime,
+
+    @Column(name = "uploaded", nullable = false)
+    val uploaded: Boolean,
+
+    @Column(name = "file_size", nullable = false)
+    val fileSize: Long
 ) {
     constructor(
         documentId: UUID,
         path: String,
         type: String,
-        createdDate: java.time.LocalDateTime
+        createdDate: java.time.LocalDateTime,
+        fileSize: Long
     ) : this(
         id = UUID.randomUUID(),
         documentId = documentId,
         path = path,
         type = type,
-        createdDate = createdDate
+        createdDate = createdDate,
+        uploaded = false,
+        fileSize = fileSize
     )
 }
