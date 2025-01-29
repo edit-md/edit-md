@@ -11,10 +11,7 @@ import md.edit.services.file.exceptions.UploadedFileNotFoundException
 import md.edit.services.file.repos.FileMetadataRepository
 import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.core.io.InputStreamResource
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.util.*
 
@@ -30,7 +27,10 @@ class FileService(private val fileRepository: FileRepository,
 
         val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
 
-        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
+        if(document.visibility == DocumentVisibility.PRIVATE)
+            AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
+        else
+            AuthorizationUtils.onlyUser(authentication)
 
         return file
     }
@@ -74,7 +74,10 @@ class FileService(private val fileRepository: FileRepository,
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
 
-        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
+        if(document.visibility == DocumentVisibility.PRIVATE)
+            AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
+        else
+            AuthorizationUtils.onlyUser(authentication)
 
         val files = metadataRepository.findByDocumentId(documentId)
 
