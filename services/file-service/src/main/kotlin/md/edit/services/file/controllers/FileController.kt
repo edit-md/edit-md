@@ -2,14 +2,14 @@ package md.edit.services.file.controllers
 
 import md.edit.services.file.dtos.FileDtoOut
 import md.edit.services.file.services.FileService
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
 import java.util.*
 
 
@@ -26,6 +26,17 @@ class FileController(private val fileService: FileService) {
     fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
         val presignedUrl = fileService.generatePresignedDownloadUrl(fileId, authentication)
         return ResponseEntity.ok(presignedUrl)
+    }
+
+    @GetMapping("image/{fileId}/download")
+    fun downloadImage(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<InputStreamResource> {
+        val file = fileService.getFileInformation(fileId, authentication)
+        val fileName = file.path.substring(file.path.lastIndexOf('/') + 1)
+        val resource = fileService.getInputStreamOfImage(fileId, authentication)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${fileName}\"")
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(resource)
     }
 
     @GetMapping("/")
