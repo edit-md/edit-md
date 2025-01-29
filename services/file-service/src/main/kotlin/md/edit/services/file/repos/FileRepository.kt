@@ -10,6 +10,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
 
 @Repository
 class FileRepository(private val minioClient: MinioClient) {
@@ -57,6 +58,21 @@ class FileRepository(private val minioClient: MinioClient) {
             )
 
             return stream
+        } catch(e: MinioException) {
+            throw MinIOException()
+        }
+    }
+
+    fun getFilesize(id: UUID): Long{
+        try {
+            val stat = minioClient.statObject(
+                StatObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(id.toString())
+                    .build()
+            )
+
+            return stat.size()
         } catch(e: MinioException) {
             throw MinIOException()
         }

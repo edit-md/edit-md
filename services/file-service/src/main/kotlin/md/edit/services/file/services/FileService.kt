@@ -94,6 +94,38 @@ class FileService(private val fileRepository: FileRepository,
         return file
     }
 
+    fun updateUploadedStateOfFile(fileId: UUID, uploaded: Boolean, authentication: Authentication): Boolean {
+        val file = metadataRepository.findById(fileId)
+            .orElseThrow { UploadedFileNotFoundException() }
+
+        val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
+
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
+
+        file.uploaded = uploaded
+
+        metadataRepository.save(file)
+
+        return uploaded
+    }
+
+    fun updateFilesizeStateOfFile(fileId: UUID, authentication: Authentication): Long{
+        val file = metadataRepository.findById(fileId)
+            .orElseThrow { UploadedFileNotFoundException() }
+
+        val document = documentService.fetchDocumentData(file.documentId) ?: throw DocumentNotFoundException()
+
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
+
+        val filesize = fileRepository.getFilesize(fileId)
+
+        file.fileSize = filesize
+
+        metadataRepository.save(file)
+
+        return filesize
+    }
+
     fun generatePresignedUploadUrl(fileId: UUID, documentId: UUID, authentication: Authentication): String {
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()

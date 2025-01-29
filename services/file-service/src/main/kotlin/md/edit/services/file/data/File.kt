@@ -22,10 +22,10 @@ data class File(
     val createdDate: java.time.LocalDateTime,
 
     @Column(name = "uploaded", nullable = false)
-    val uploaded: Boolean,
+    var uploaded: Boolean,
 
     @Column(name = "file_size", nullable = true)
-    val fileSize: Long? = null
+    var fileSize: Long? = null
 ) {
     constructor(
         documentId: UUID,

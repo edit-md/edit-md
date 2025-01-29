@@ -1,7 +1,6 @@
 package md.edit.services.file.controllers
 
-import md.edit.services.file.dtos.FileDtoOut
-import md.edit.services.file.dtos.PresignedUploadURLDtoOut
+import md.edit.services.file.dtos.*
 import md.edit.services.file.services.FileService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -47,10 +46,18 @@ class FileController(private val fileService: FileService) {
     }
 
     @PostMapping("/")
-    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID,@RequestParam("type") type: String, authentication: Authentication): ResponseEntity<PresignedUploadURLDtoOut> {
-        val file = fileService.saveUploadRequest(documentId, type, authentication)
-        val presignedUrl = fileService.generatePresignedUploadUrl(file.id, documentId, authentication)
+    fun getPresignedUploadUrl(@RequestBody presignedUploadURLDtoIn: PresignedUploadURLDtoIn, authentication: Authentication): ResponseEntity<PresignedUploadURLDtoOut> {
+        val file = fileService.saveUploadRequest(presignedUploadURLDtoIn.document, presignedUploadURLDtoIn.type, authentication)
+        val presignedUrl = fileService.generatePresignedUploadUrl(file.id, presignedUploadURLDtoIn.document, authentication)
         return ResponseEntity.ok(PresignedUploadURLDtoOut(file.id, presignedUrl))
+    }
+
+    @PatchMapping("/{fileId}")
+    fun updateFileMetadata(@PathVariable fileId: UUID, @RequestBody updateFileDtoIn: UpdateFileDtoIn, authentication: Authentication): ResponseEntity<UpdateFileDtoOut> {
+        fileService.updateUploadedStateOfFile(fileId, updateFileDtoIn.uploaded, authentication)
+        val size = fileService.updateFilesizeStateOfFile(fileId, authentication)
+
+        return ResponseEntity.ok(UpdateFileDtoOut(size))
     }
 
     @DeleteMapping("/{fileId}")
