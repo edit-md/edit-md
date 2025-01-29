@@ -1,6 +1,7 @@
 package md.edit.services.file.controllers
 
 import md.edit.services.file.dtos.FileDtoOut
+import md.edit.services.file.dtos.PresignedUploadURLDtoOut
 import md.edit.services.file.services.FileService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -46,9 +47,10 @@ class FileController(private val fileService: FileService) {
     }
 
     @PostMapping("/")
-    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<String> {
-        val presignedUrl = fileService.generatePresignedUploadUrl(documentId, authentication)
-        return ResponseEntity.ok(presignedUrl)
+    fun getPresignedUploadUrl(@RequestParam("doc") documentId: UUID,@RequestParam("type") type: String, authentication: Authentication): ResponseEntity<PresignedUploadURLDtoOut> {
+        val file = fileService.saveUploadRequest(documentId, type, authentication)
+        val presignedUrl = fileService.generatePresignedUploadUrl(file.id, documentId, authentication)
+        return ResponseEntity.ok(PresignedUploadURLDtoOut(file.id, presignedUrl))
     }
 
     @DeleteMapping("/{fileId}")

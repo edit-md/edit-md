@@ -5,7 +5,7 @@ CREATE TABLE files (
     Type VARCHAR(50) NOT NULL,
     created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     uploaded BOOLEAN NOT NULL DEFAULT FALSE,
-    file_size BIGINT NOT NULL
+    file_size BIGINT
 );
 
 CREATE INDEX idx_document_id ON files USING BTREE (document_id);

@@ -11,9 +11,11 @@ import md.edit.services.file.exceptions.UploadedFileNotFoundException
 import md.edit.services.file.repos.FileMetadataRepository
 import md.edit.services.file.utils.AuthorizationUtils
 import org.springframework.core.io.InputStreamResource
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -79,13 +81,26 @@ class FileService(private val fileRepository: FileRepository,
         return files
     }
 
-    fun generatePresignedUploadUrl(documentId: UUID, authentication: Authentication): String {
+    fun saveUploadRequest(documentId: UUID, type: String, authentication: Authentication): File {
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
 
         AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
-        return fileRepository.generatePresignedUploadUrl()
+        val file = File(documentId, type, LocalDateTime.now())
+
+        metadataRepository.save(file)
+
+        return file
+    }
+
+    fun generatePresignedUploadUrl(fileId: UUID, documentId: UUID, authentication: Authentication): String {
+
+        val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
+
+        AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
+
+        return fileRepository.generatePresignedUploadUrl(fileId)
     }
 
     fun deleteFile(fileId: UUID, authentication: Authentication){
