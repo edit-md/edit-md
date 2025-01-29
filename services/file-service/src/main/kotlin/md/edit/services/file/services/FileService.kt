@@ -21,7 +21,7 @@ class FileService(private val fileRepository: FileRepository,
                   private val metadataRepository: FileMetadataRepository,
                   private val documentService: DocumentService) {
 
-    fun getFileInformation(fileId: UUID, authentication: Authentication): File {
+    fun getFileInformation(fileId: UUID, authentication: Authentication?): File {
 
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
@@ -30,13 +30,11 @@ class FileService(private val fileRepository: FileRepository,
 
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
-        else
-            AuthorizationUtils.onlyUser(authentication)
 
         return file
     }
 
-    fun generatePresignedDownloadUrl(fileId: UUID, authentication: Authentication): String {
+    fun generatePresignedDownloadUrl(fileId: UUID, authentication: Authentication?): String {
 
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
@@ -45,13 +43,11 @@ class FileService(private val fileRepository: FileRepository,
 
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
-        else
-            AuthorizationUtils.onlyUser(authentication)
 
         return fileRepository.generatePresignedDownloadUrl(file.path)
     }
 
-    fun getInputStreamOfImage(fileId: UUID, authentication: Authentication): InputStreamResource {
+    fun getInputStreamOfImage(fileId: UUID, authentication: Authentication?): InputStreamResource {
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
 
@@ -62,8 +58,6 @@ class FileService(private val fileRepository: FileRepository,
 
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
-        else
-            AuthorizationUtils.onlyUser(authentication)
 
         val stream = fileRepository.getInputStreamOfImage(file.path.substring(file.path.lastIndexOf('/') + 1))
 
@@ -71,14 +65,12 @@ class FileService(private val fileRepository: FileRepository,
 
     }
 
-    fun getAllFilesFromDocument(documentId: UUID, authentication: Authentication): List<File> {
+    fun getAllFilesFromDocument(documentId: UUID, authentication: Authentication?): List<File> {
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
 
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
-        else
-            AuthorizationUtils.onlyUser(authentication)
 
         val files = metadataRepository.findByDocumentId(documentId)
 

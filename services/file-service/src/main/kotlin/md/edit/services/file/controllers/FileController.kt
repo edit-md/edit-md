@@ -17,19 +17,19 @@ import java.util.*
 class FileController(private val fileService: FileService) {
 
     @GetMapping("/{fileId}")
-    fun getFileInformation(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<FileDtoOut> {
+    fun getFileInformation(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<FileDtoOut> {
         val file = fileService.getFileInformation(fileId, authentication)
         return ResponseEntity.ok(FileDtoOut(file))
     }
 
     @GetMapping("/{fileId}/download")
-    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<String> {
+    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<String> {
         val presignedUrl = fileService.generatePresignedDownloadUrl(fileId, authentication)
         return ResponseEntity.ok(presignedUrl)
     }
 
     @GetMapping("image/{fileId}/download")
-    fun downloadImage(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<InputStreamResource> {
+    fun downloadImage(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<InputStreamResource> {
         val file = fileService.getFileInformation(fileId, authentication)
         val fileName = file.path.substring(file.path.lastIndexOf('/') + 1)
         val resource = fileService.getInputStreamOfImage(fileId, authentication)
@@ -40,7 +40,7 @@ class FileController(private val fileService: FileService) {
     }
 
     @GetMapping("/")
-    fun getAllFilesFromDocument(@RequestParam("doc") documentId: UUID, authentication: Authentication): ResponseEntity<List<FileDtoOut>> {
+    fun getAllFilesFromDocument(@RequestParam("doc") documentId: UUID, authentication: Authentication?): ResponseEntity<List<FileDtoOut>> {
         val files = fileService.getAllFilesFromDocument(documentId, authentication)
         return ResponseEntity.ok(files.map{FileDtoOut(it)})
     }
