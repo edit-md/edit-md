@@ -78,7 +78,9 @@ class FileService(private val fileRepository: FileRepository,
 
         val files = metadataRepository.findByDocumentId(documentId)
 
-        return files
+        val uploadedFiles = files.filter { it.uploaded }
+
+        return uploadedFiles
     }
 
     fun saveUploadRequest(documentId: UUID, type: String, authentication: Authentication): File {
