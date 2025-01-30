@@ -12,7 +12,7 @@ import org.springframework.security.web.csrf.DefaultCsrfToken
 // See https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#employing-custom-request-headers-for-ajaxapi for more information
 class CsrfFilter(private val contextPath: String): Filter {
     private val csrfHeader = "X-CSRF-Protection"
-    private val allowedRoutes = setOf("/oauth2", "/error", "/image")
+    private val allowedRoutes = setOf("/error", "/image")
 
     override fun init(filterConfig: FilterConfig?) {
         super.init(filterConfig)

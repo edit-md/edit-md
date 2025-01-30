@@ -10,9 +10,9 @@ import org.springframework.security.web.csrf.DefaultCsrfToken
 // This filter checks for the presence of a CSRF Header in the request and writes a 403 response if the header is missing
 // This is only working when CORS is set up correctly and the frontend is sending the CSRF header
 // See https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#employing-custom-request-headers-for-ajaxapi for more information
-class CsrfFilter: Filter {
+class CsrfFilter(private val contextPath: String): Filter {
     private val csrfHeader = "X-CSRF-Protection"
-    private val allowedRoutes = setOf("/oauth2", "/error")
+    private val allowedRoutes = setOf("/error")
 
     override fun init(filterConfig: FilterConfig?) {
         super.init(filterConfig)
@@ -35,7 +35,7 @@ class CsrfFilter: Filter {
         }
 
         // Allow requests to the OAuth2 and default error endpoints
-        if(allowedRoutes.any { httpRequest.requestURI.startsWith(it) }) {
+        if(allowedRoutes.any { httpRequest.requestURI.replace(contextPath, "").startsWith(it) }) {
             chain.doFilter(httpRequest, httpResponse)
             return
         }
