@@ -3,14 +3,12 @@ package md.edit.services.file.controllers
 import md.edit.services.file.dtos.*
 import md.edit.services.file.services.FileService
 import org.springframework.core.io.InputStreamResource
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @RestController
@@ -36,6 +34,7 @@ class FileController(private val fileService: FileService) {
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${fileName}\"")
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .cacheControl(CacheControl.maxAge(60, TimeUnit.MINUTES))
             .body(resource)
     }
 
