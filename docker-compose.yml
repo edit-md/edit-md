@@ -220,9 +220,12 @@ services:
             target: dev
         environment:
             - EDITMD_SESSION_COOKIE=${EDITMD_SESSION_COOKIE}
+            - PUBLIC_EDITMD_DOMAIN=${PUBLIC_EDITMD_DOMAIN}
             - EDITMD_DOMAIN=${EDITMD_DOMAIN}
             - EDITMD_API_KEY=${EDITMD_API_KEY}
             - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
+            - EDITMD_DOCUMENT_SERVICE_HOST=http://document-service:8080
+            - EDITMD_FILE_SERVICE_HOST=http://file-service:8080
         develop:
             watch:
                 - path: ./services/frontend/src
