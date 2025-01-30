@@ -57,7 +57,7 @@ class DocumentController(
                     authentication,
                     document.owner,
                     *document.documentUsers.map { it.id.userId }.toTypedArray()
-                )
+                ) || AuthorizationUtils.isAPI(authentication)
             )
         )
     }
