@@ -22,6 +22,8 @@ spec:
           value: {{ .Values.global.sessionCookie.name }}
         - name: EDITMD_DOMAIN
           value: {{ .Values.global.domain }}
+        - name: PUBLIC_EDITMD_DOMAIN
+          value: {{ .Values.global.domain }}
         - name: EDITMD_API_KEY
           value: {{ .Values.global.apiKey }}
         - name: EDITMD_ACCOUNT_SERVICE_HOST
