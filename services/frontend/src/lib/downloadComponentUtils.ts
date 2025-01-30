@@ -7,7 +7,7 @@ export function generateDownloadComponent(file: any) {
     return `
     <div class="file-download text-base">
 		
-        <p class="line-clamp-1"><span class="font-bold">File:</span> ${file.fileName || "Unnamed"}</p>
+        <p class="line-clamp-1"><span class="font-bold">File:</span> ${file.name || "Unnamed"}</p>
 
         <button class="file-download-btn" data-file-id="${file.id}">
             Download

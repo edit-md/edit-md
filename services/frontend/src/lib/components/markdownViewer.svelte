@@ -184,7 +184,7 @@
 				.then(blob => {
 					const link = document.createElement("a");
 					link.href = URL.createObjectURL(blob);
-					link.download = data.file.fileName;
+					link.download = data.file.name;
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);

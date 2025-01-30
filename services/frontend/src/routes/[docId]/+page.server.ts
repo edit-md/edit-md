@@ -15,14 +15,20 @@ export const load: PageServerLoad = async (req) => {
 	const fileServiceHost = env.EDITMD_FILE_SERVICE_HOST;
 
 	try {
-		const [document, files] = await Promise.all([
-			fetchData(req, `${documentServiceHost}/api/documents/${req.params.docId}`),
-			fetchData(req, `${fileServiceHost}/api/files?doc=${req.params.docId}`),
-		]);
+		data.document = await fetchData(req, `${documentServiceHost}/api/documents/${req.params.docId}`);
+	} catch (e) {
+		if (e instanceof SessionError) {
+			// ignored
+		} else if (e instanceof DOMException && e.name === 'AbortError') {
+			console.log('Request to document-service timed out');
+		} else {
+			console.log('Unexpected error:', e);
+			redirect(302, '/');
+		}
+	}
 
-		data.document = document;
-		data.files = files;
-
+	try {
+		data.files = await fetchData(req, `${fileServiceHost}/api/files?doc=${req.params.docId}`);
 	} catch (e) {
 		if (e instanceof SessionError) {
 			// ignored
