@@ -44,7 +44,7 @@ class FileService(private val fileRepository: FileRepository,
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
 
-        return fileRepository.generatePresignedDownloadUrl(file.path)
+        return fileRepository.generatePresignedDownloadUrl(file.id)
     }
 
     fun getInputStreamOfImage(fileId: UUID, authentication: Authentication?): InputStreamResource {
@@ -59,7 +59,7 @@ class FileService(private val fileRepository: FileRepository,
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
 
-        val stream = fileRepository.getInputStreamOfImage(file.path.substring(file.path.lastIndexOf('/') + 1))
+        val stream = fileRepository.getInputStreamOfImage(file.id)
 
         return InputStreamResource(stream)
 
@@ -79,20 +79,20 @@ class FileService(private val fileRepository: FileRepository,
         return uploadedFiles
     }
 
-    fun saveUploadRequest(documentId: UUID, type: String, authentication: Authentication): File {
+    fun saveUploadRequest(documentId: UUID, name: String, type: String, authentication: Authentication): File {
 
         val document = documentService.fetchDocumentData(documentId) ?: throw DocumentNotFoundException()
 
         AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
-        val file = File(documentId, type, LocalDateTime.now())
+        val file = File(documentId, name, type, LocalDateTime.now())
 
         metadataRepository.save(file)
 
         return file
     }
 
-    fun updateUploadedStateOfFile(fileId: UUID, uploaded: Boolean, authentication: Authentication): Boolean {
+    fun updateUploadedStateOfFile(fileId: UUID, uploaded: Boolean, authentication: Authentication): File {
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
 
@@ -107,10 +107,10 @@ class FileService(private val fileRepository: FileRepository,
 
         metadataRepository.save(file)
 
-        return uploaded
+        return file
     }
 
-    fun updateFilesizeStateOfFile(fileId: UUID, authentication: Authentication): Long{
+    fun updateFilesizeStateOfFile(fileId: UUID, authentication: Authentication): File{
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
 
@@ -118,13 +118,11 @@ class FileService(private val fileRepository: FileRepository,
 
         AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
-        val filesize = fileRepository.getFilesize(fileId)
-
-        file.fileSize = filesize
+        file.fileSize = fileRepository.getFilesize(fileId)
 
         metadataRepository.save(file)
 
-        return filesize
+        return file
     }
 
     fun generatePresignedUploadUrl(fileId: UUID, documentId: UUID, authentication: Authentication): String {
@@ -136,7 +134,7 @@ class FileService(private val fileRepository: FileRepository,
         return fileRepository.generatePresignedUploadUrl(fileId)
     }
 
-    fun deleteFile(fileId: UUID, authentication: Authentication){
+    fun deleteFile(fileId: UUID, authentication: Authentication): File{
 
         val file = metadataRepository.findById(fileId)
             .orElseThrow { UploadedFileNotFoundException() }
@@ -145,7 +143,9 @@ class FileService(private val fileRepository: FileRepository,
 
         AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
-        fileRepository.deleteFile(file.path)
+        fileRepository.deleteFile(file.id)
         metadataRepository.deleteById(fileId)
+
+        return file
     }
 }

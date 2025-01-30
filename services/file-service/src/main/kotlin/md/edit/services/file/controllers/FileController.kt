@@ -21,18 +21,20 @@ class FileController(private val fileService: FileService) {
     }
 
     @GetMapping("/{fileId}/download")
-    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<String> {
+    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<PresignedDownloadURLDtoOut> {
+        val file = fileService.getFileInformation(fileId, authentication)
         val presignedUrl = fileService.generatePresignedDownloadUrl(fileId, authentication)
-        return ResponseEntity.ok(presignedUrl)
+        return ResponseEntity.ok(PresignedDownloadURLDtoOut(file, presignedUrl))
     }
 
     @GetMapping("image/{fileId}/download")
     fun downloadImage(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<InputStreamResource> {
         val file = fileService.getFileInformation(fileId, authentication)
-        val fileName = file.path.substring(file.path.lastIndexOf('/') + 1)
+        val fileName = file.name
+        val fileType = file.type.substring(file.type.lastIndexOf('/') + 1)
         val resource = fileService.getInputStreamOfImage(fileId, authentication)
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${fileName}\"")
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${fileName}.${fileType}\"")
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .cacheControl(CacheControl.maxAge(60, TimeUnit.MINUTES))
             .body(resource)
@@ -46,24 +48,24 @@ class FileController(private val fileService: FileService) {
 
     @PostMapping("/")
     fun getPresignedUploadUrl(@RequestBody presignedUploadURLDtoIn: PresignedUploadURLDtoIn, authentication: Authentication): ResponseEntity<PresignedUploadURLDtoOut> {
-        val file = fileService.saveUploadRequest(presignedUploadURLDtoIn.document, presignedUploadURLDtoIn.type, authentication)
+        val file = fileService.saveUploadRequest(presignedUploadURLDtoIn.document, presignedUploadURLDtoIn.name, presignedUploadURLDtoIn.type, authentication)
         val presignedUrl = fileService.generatePresignedUploadUrl(file.id, presignedUploadURLDtoIn.document, authentication)
         return ResponseEntity.ok(PresignedUploadURLDtoOut(file.id, presignedUrl))
     }
 
     @PatchMapping("/{fileId}")
-    fun updateFileMetadata(@PathVariable fileId: UUID, @RequestBody updateFileDtoIn: UpdateFileDtoIn, authentication: Authentication): ResponseEntity<UpdateFileDtoOut> {
-        fileService.updateUploadedStateOfFile(fileId, updateFileDtoIn.uploaded, authentication)
-        val size = fileService.updateFilesizeStateOfFile(fileId, authentication)
+    fun updateFileMetadata(@PathVariable fileId: UUID, @RequestBody updateFileDtoIn: UpdateFileDtoIn, authentication: Authentication): ResponseEntity<FileDtoOut> {
+        val file = fileService.updateUploadedStateOfFile(fileId, updateFileDtoIn.uploaded, authentication)
+        fileService.updateFilesizeStateOfFile(fileId, authentication)
 
-        return ResponseEntity.ok(UpdateFileDtoOut(size))
+        return ResponseEntity.ok(FileDtoOut(file))
     }
 
     @DeleteMapping("/{fileId}")
-    fun deleteFile(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<Boolean> {
+    fun deleteFile(@PathVariable fileId: UUID, authentication: Authentication): ResponseEntity<FileDtoOut> {
         try {
-            fileService.deleteFile(fileId, authentication)
-            return ResponseEntity.ok(true)
+            val file = fileService.deleteFile(fileId, authentication)
+            return ResponseEntity.ok(FileDtoOut(file))
         } catch(e: IllegalArgumentException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
         }
