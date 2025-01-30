@@ -8,6 +8,14 @@
 	let user = $state(data.user);
 </script>
 
+<svelte:head>
+	{#if loggedIn}
+		<title>edit.md - Dashboard</title>
+	{:else}
+		<title>edit.md - Welcome</title>
+	{/if}
+</svelte:head>
+
 {#if loggedIn}
 	<DashboardContent {user} documents={data.documents} />
 {:else}

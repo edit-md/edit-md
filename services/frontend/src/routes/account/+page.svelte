@@ -16,6 +16,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>edit.md - Account</title>
+</svelte:head>
+
 <div class="pageContainer bg-background">
 	<Header {user}></Header>
 	<div class="contentContainer container mx-auto p-4">

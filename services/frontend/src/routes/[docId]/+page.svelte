@@ -157,6 +157,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>edit.md - {documentState.title}</title>
+</svelte:head>
+
 <div class="pageContainer bg-background">
 	<Header {user} fullWidth={!viewState.onlyPreview}>
 		{#snippet center()}
