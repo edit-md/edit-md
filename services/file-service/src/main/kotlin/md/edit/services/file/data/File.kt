@@ -15,9 +15,6 @@ data class File(
     @Column(name = "name", nullable = false)
     val name: String,
 
-    @Column(name = "path", nullable = false)
-    val path: String = "/${id}",
-
     @Column(name = "type", nullable = false)
     val type: String,
 

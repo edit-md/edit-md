@@ -44,7 +44,7 @@ class FileService(private val fileRepository: FileRepository,
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
 
-        return fileRepository.generatePresignedDownloadUrl(file.path)
+        return fileRepository.generatePresignedDownloadUrl(file.id)
     }
 
     fun getInputStreamOfImage(fileId: UUID, authentication: Authentication?): InputStreamResource {
@@ -59,7 +59,7 @@ class FileService(private val fileRepository: FileRepository,
         if(document.visibility == DocumentVisibility.PRIVATE)
             AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.READ))
 
-        val stream = fileRepository.getInputStreamOfImage(file.path.substring(file.path.lastIndexOf('/') + 1))
+        val stream = fileRepository.getInputStreamOfImage(file.id)
 
         return InputStreamResource(stream)
 
@@ -143,7 +143,7 @@ class FileService(private val fileRepository: FileRepository,
 
         AuthorizationUtils.onlyUsers(authentication, *documentService.getUsersWithPermission(document.id, DocumentPermission.WRITE))
 
-        fileRepository.deleteFile(file.path)
+        fileRepository.deleteFile(file.id)
         metadataRepository.deleteById(fileId)
 
         return file

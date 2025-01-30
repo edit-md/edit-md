@@ -29,10 +29,11 @@ class FileController(private val fileService: FileService) {
     @GetMapping("image/{fileId}/download")
     fun downloadImage(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<InputStreamResource> {
         val file = fileService.getFileInformation(fileId, authentication)
-        val fileName = file.path.substring(file.path.lastIndexOf('/') + 1)
+        val fileName = file.name
+        val fileType = file.type.substring(file.type.lastIndexOf('/') + 1)
         val resource = fileService.getInputStreamOfImage(fileId, authentication)
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${fileName}\"")
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${fileName}.${fileType}\"")
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .cacheControl(CacheControl.maxAge(60, TimeUnit.MINUTES))
             .body(resource)

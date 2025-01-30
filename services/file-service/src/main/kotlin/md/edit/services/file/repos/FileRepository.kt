@@ -16,12 +16,12 @@ class FileRepository(private val minioClient: MinioClient) {
     @Value("\${minio.bucket-name}")
     private lateinit var bucketName: String
 
-    fun generatePresignedDownloadUrl(filePath: String): String {
+    fun generatePresignedDownloadUrl(id: UUID): String {
         try {
             return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                     .bucket(bucketName)
-                    .`object`(filePath)
+                    .`object`(id.toString())
                     .method(Method.GET)
                     .expiry(1, TimeUnit.MINUTES)
                     .build()
@@ -46,12 +46,12 @@ class FileRepository(private val minioClient: MinioClient) {
         }
     }
 
-    fun getInputStreamOfImage(filePath: String): InputStream {
+    fun getInputStreamOfImage(id: UUID): InputStream {
         try{
             val stream = minioClient.getObject(
                 GetObjectArgs.builder()
                     .bucket(bucketName)
-                    .`object`(filePath)
+                    .`object`(id.toString())
                     .build()
             )
 
@@ -76,12 +76,12 @@ class FileRepository(private val minioClient: MinioClient) {
         }
     }
 
-    fun deleteFile(filePath: String) {
+    fun deleteFile(id: UUID) {
         try {
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
                     .bucket(bucketName)
-                    .`object`(filePath)
+                    .`object`(id.toString())
                     .build()
             )
         } catch (e: MinioException) {
