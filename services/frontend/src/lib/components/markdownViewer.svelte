@@ -3,12 +3,16 @@
 	import { ScrollArea } from 'bits-ui';
 	import DOMPurify from 'isomorphic-dompurify';
 	import { convertEmojis } from '$lib/markdownUtils';
+	import { env } from '$env/dynamic/public';
+	import { fetchFileInformation, generateDownloadComponent } from '$lib/downloadComponentUtils';
+	import { browser } from '$app/environment';
 
-	let { content, class: className = '', inContainer = false } = $props();
+	let { content, files = [], class: className = '', inContainer = false } = $props();
 
 	let parsed = $state('');
 
 	var purify = DOMPurify;
+	let listeners = [];
 
 	updatePreview(content);
 
@@ -49,7 +53,22 @@
 			}
 		});
 
-		parsed = purify.sanitize(marked.parser(tokens), {
+		marked.use({
+			renderer: {
+				image({ href, text }) {
+					if (href.includes(env.PUBLIC_EDITMD_DOMAIN)) {
+						if (href.includes('image')) {
+							return `<img src="${href}" alt="${text}" class="max-w-full" />`;
+						}
+						
+						return `<file-download data-file="${href}"></file-download>`;
+					}
+					return `<img src="${href}" alt="${text}" class="max-w-full" />`;
+				}
+			}
+		});
+
+		let sanitized = purify.sanitize(marked.parser(tokens), {
 			ALLOWED_TAGS: [
 				'a',
 				'b',
@@ -63,6 +82,7 @@
 				'dl',
 				'dt',
 				'em',
+				'file-download',
 				'h1',
 				'h2',
 				'h3',
@@ -95,6 +115,102 @@
 			],
 			FORBID_ATTR: ['class', 'id']
 		});
+
+		if(files.length > 0) {
+			const fileDownloadElements = sanitized.match(/<file-download[^>]*>.*?<\/file-download>/g);
+
+			// for each matched file-download element
+			fileDownloadElements?.forEach((element, index) => {
+				// get the file id from the element
+				const fileId = element.match(/data-file="([^"]*)"/)?.[1]?.split('/').pop();
+
+				if(fileId === undefined) {
+					return;
+				}
+
+				// find the file in the files array
+				let file = files.find((file) => file.id === fileId);
+
+				if(file === undefined) {
+					fetchFileInformation(fileId).then((f) => {
+						files.push(f);
+						updatePreview(content);
+					});
+				}
+
+				// replace the file-download with a iframe
+				sanitized = sanitized.replace(
+					element,
+					generateDownloadComponent(file));
+			});
+		}
+
+		// get all image elements and replace their src with the download url
+		const imageElements = sanitized.match(/<img[^>]*>/g);
+
+		imageElements?.forEach((element, index) => {
+			const src = element.match(/src="([^"]*)"/);
+			const srcUrl = src?.[1];
+
+			if(srcUrl === undefined) {
+				return;
+			}
+
+			if(srcUrl.includes(env.PUBLIC_EDITMD_DOMAIN) && srcUrl.includes('image')) {
+				sanitized = sanitized.replace(
+					src[0],
+					`src="${srcUrl}/download"`
+				);
+			}
+		});
+
+		parsed = sanitized;
+
+		if(browser) {
+			setTimeout(() => {
+				// attach event listener to all file-download-btn elements
+				const fileDownloadBtns = document.querySelectorAll('.file-download-btn');
+				fileDownloadBtns.forEach((element) => {
+					element.addEventListener("click", downloadFile);
+				})			
+			}, 0);
+		}
+	}
+
+	async function downloadFile(e: MouseEvent) {
+		const target = e.target as HTMLElement;
+		console.log(target);
+		const fileId = target.dataset.fileId;
+
+		if(fileId == null || fileId == undefined) {
+			console.log("File id not found");
+			return;
+		}
+
+		const resp = await fetch("/api/files/" + fileId + "/download", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRF-PROTECTION": "1"
+			}
+		});
+
+		if(resp.ok) {
+			let data = await resp.json();
+			
+			fetch(data.url)
+				.then(response => response.blob())
+				.then(blob => {
+					const link = document.createElement("a");
+					link.href = URL.createObjectURL(blob);
+					link.download = data.file.name;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					URL.revokeObjectURL(link.href);
+				})
+				.catch(error => console.error("Error downloading the File:", error));
+		}
 	}
 
 	$effect(() => {
@@ -102,7 +218,7 @@
 	});
 </script>
 
-<ScrollArea.Root class="relative h-full w-full">
+<ScrollArea.Root class="relative h-full w-full {className}">
 	<ScrollArea.Viewport class="h-full w-full">
 		<ScrollArea.Content>
 			<div
@@ -124,6 +240,14 @@
 </ScrollArea.Root>
 
 <style>
+	:global(.markdown-viewer .file-download) {
+		@apply text-foreground-100 bg-foreground-10 my-4 block w-72 max-w-full rounded-md p-4;
+	}
+
+	:global(.markdown-viewer .file-download button) {
+		@apply flex items-center justify-between gap-2 px-4 py-2 hover:bg-foreground-20 cursor-pointer bg-foreground-10 rounded-md transition-all duration-150 text-nowrap w-full;
+	}
+
 	:global(.markdown-viewer h1) {
 		@apply mb-2 mt-4 text-3xl font-bold;
 	}
@@ -204,5 +328,9 @@
 
 	:global(.markdown-viewer hr) {
 		@apply border-foreground-50 my-6 border-t;
+	}
+
+	:global(.markdown-viewer img) {
+		@apply max-w-full rounded-md;
 	}
 </style>

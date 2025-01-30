@@ -4,6 +4,7 @@
 	import { defaultKeymap } from '@codemirror/commands';
 	import { onDestroy, onMount } from 'svelte';
 	import { DeleteOperation, InsertOperation, type Operation } from '$lib/operations';
+	import { ScrollArea } from 'bits-ui';
 
 	let { class: className = '', documentState = $bindable(), onchange = (operations: Operation[]) => {} } = $props();
 	let editorContainer: HTMLDivElement;
@@ -17,7 +18,6 @@
 
 			let oldDoc = documentState.content as string;
 			let currentRevision = documentState.revision;
-			console.log('Current revision:', currentRevision);
 
 			// update the document state
 			documentState.content = tr.newDoc.toString();
@@ -91,7 +91,6 @@
 			if (combinedChanges.length > 0) changes = combinedChanges;
 
 			if (changes.length > 0) {
-				console.log('Changes:', changes);
 				onchange(changes);
 			}
 		};
@@ -151,10 +150,10 @@
 	});
 
 	// Function to insert text at a specific index
-	export function insertText(index: number, text: string) {
+	export function insertText(index: number, text: string, triggerChange = false) {
 		const transaction = view.state.update({
 			changes: { from: index, insert: text }, // Specify insertion
-			annotations: SkipMonitorAnnotation.of(true), // Add annotation
+			annotations: SkipMonitorAnnotation.of(!triggerChange), // Add annotation
 			scrollIntoView: false
 		});
 
@@ -162,18 +161,37 @@
 	}
 
 	// Function to delete a range of text
-	export function deleteText(index: number, len: number) {
+	export function deleteText(index: number, len: number, triggerChange = false) {
 		const transaction = view.state.update({
 			changes: { from: index, to: index + len }, // Specify deletion
-			annotations: SkipMonitorAnnotation.of(true), // Add annotation
+			annotations: SkipMonitorAnnotation.of(!triggerChange), // Add annotation
 			scrollIntoView: false
 		});
 
 		view.dispatch(transaction);
 	}
+
+	export function getCursorPosition() {
+		return view.state.selection.main.head;
+	}
 </script>
 
-<div bind:this={editorContainer} class={className}></div>
+<ScrollArea.Root class="relative h-full w-full {className}">
+	<ScrollArea.Viewport class="h-full w-full">
+		<ScrollArea.Content class="min-h-full h-full">
+			<div bind:this={editorContainer} class={className}></div>
+		</ScrollArea.Content>
+	</ScrollArea.Viewport>
+	<ScrollArea.Scrollbar
+		orientation="vertical"
+		class="flex h-full w-2.5 touch-none select-none rounded-full border-l border-l-transparent p-px transition-all hover:w-3"
+	>
+		<ScrollArea.Thumb
+			class="bg-foreground-20 relative flex-1 rounded-full opacity-40 transition-opacity hover:opacity-100"
+		/>
+	</ScrollArea.Scrollbar>
+	<ScrollArea.Corner />
+</ScrollArea.Root>
 
 <style>
 	:global(.cm-editor .cm-scroller) {

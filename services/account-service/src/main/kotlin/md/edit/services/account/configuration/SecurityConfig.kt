@@ -24,11 +24,14 @@ class SecurityConfig(
     @Value("\${edit-md.domain}")
     private lateinit var applicationHost: String
 
+    @Value("\${server.servlet.context-path}")
+    private lateinit var contextPath: String
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
         // Add the CSRF filter before the UsernamePasswordAuthenticationFilter
-        http.addFilterBefore(CsrfFilter(), UsernamePasswordAuthenticationFilter::class.java)
+        http.addFilterBefore(CsrfFilter(contextPath), UsernamePasswordAuthenticationFilter::class.java)
 
         // Add the API authentication filter before the UsernamePasswordAuthenticationFilter
         http.addFilterBefore(apiAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
