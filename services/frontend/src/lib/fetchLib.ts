@@ -2,6 +2,10 @@ import type { ServerLoadEvent } from '@sveltejs/kit';
 import type { LayoutRouteId, RouteParams } from '../routes/$types';
 import { env } from '$env/dynamic/private';
 
+interface RequestParams extends RequestInit {
+	unauthenticated?: boolean;
+}
+
 export class SessionError extends Error {
 	constructor(message: string) {
 		super(message);
@@ -18,9 +22,13 @@ export class SessionError extends Error {
 export async function fetchProxy(
 	req: ServerLoadEvent<RouteParams, {}, LayoutRouteId>,
 	url: string,
-	options: RequestInit = {}
+	options: RequestParams = {}
 ): Promise<Response> {
-	if (!req.cookies) {
+	if(options.unauthenticated === undefined) {
+		options.unauthenticated = false;
+	}
+
+	if (!req.cookies && options.unauthenticated == false) {
 		throw new SessionError('Cookies not found in request');
 	}
 
@@ -28,7 +36,7 @@ export async function fetchProxy(
 	let sessionCookieName = env.EDITMD_SESSION_COOKIE;
 	const editmdSessionCookie = req.cookies.get(sessionCookieName);
 
-	if (editmdSessionCookie === undefined) {
+	if (editmdSessionCookie === undefined && options.unauthenticated == false) {
 		throw new SessionError(sessionCookieName + ' cookie not found');
 	}
 

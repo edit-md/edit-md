@@ -3,6 +3,7 @@ package md.edit.services.document.controllers
 import jakarta.validation.Valid
 import md.edit.services.document.dtos.*
 import md.edit.services.document.services.DocumentService
+import md.edit.services.document.utils.AuthorizationUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
@@ -49,7 +50,16 @@ class DocumentController(
     @GetMapping("/{id}")
     fun getDocument(authentication: Authentication?, @PathVariable id: UUID): ResponseEntity<DocumentDTO> {
         val document = documentService.getDocument(authentication, id)
-        return ResponseEntity.ok(document.toDTO(withContent = true))
+        return ResponseEntity.ok(
+            document.toDTO(
+                withContent = true,
+                withShared = AuthorizationUtils.isUser(
+                    authentication,
+                    document.owner,
+                    *document.documentUsers.map { it.id.userId }.toTypedArray()
+                )
+            )
+        )
     }
 
     @PatchMapping("/{id}")
@@ -102,8 +112,10 @@ class DocumentController(
         authentication: Authentication?,
         @RequestParam title: String
     ): ResponseEntity<Collection<DocumentDTO>> {
-        return ResponseEntity.ok(documentService.searchTitles(authentication, title).map
-        { it.toDTO() }.toList())
+        return ResponseEntity.ok(
+            documentService.searchTitles(authentication, title).map
+        { it.toDTO() }.toList()
+        )
     }
 }
 
