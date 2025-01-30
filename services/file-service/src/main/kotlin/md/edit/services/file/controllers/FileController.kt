@@ -21,9 +21,10 @@ class FileController(private val fileService: FileService) {
     }
 
     @GetMapping("/{fileId}/download")
-    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<String> {
+    fun getPresignedDownloadUrl(@PathVariable fileId: UUID, authentication: Authentication?): ResponseEntity<PresignedDownloadURLDtoOut> {
+        val file = fileService.getFileInformation(fileId, authentication)
         val presignedUrl = fileService.generatePresignedDownloadUrl(fileId, authentication)
-        return ResponseEntity.ok(presignedUrl)
+        return ResponseEntity.ok(PresignedDownloadURLDtoOut(file, presignedUrl))
     }
 
     @GetMapping("image/{fileId}/download")
