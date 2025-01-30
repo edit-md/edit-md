@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: EDITMD_SESSION_COOKIE
+          value: {{ .Values.global.sessionCookie.name }}
+        - name: EDITMD_DOMAIN
+          value: {{ .Values.global.domain }}
+        - name: PUBLIC_EDITMD_DOMAIN
+          value: {{ .Values.global.domain }}
+        - name: EDITMD_API_KEY
+          value: {{ .Values.global.apiKey }}
+        - name: EDITMD_ACCOUNT_SERVICE_HOST
+          value: "http://{{ .Release.Name }}-account-service:8080"
+        - name: EDITMD_DOCUMENT_SERVICE_HOST
+          value: "http://{{ .Release.Name }}-document-service:8080"
+        - name: EDITMD_FILE_SERVICE_HOST
+          value: "http://{{ .Release.Name }}-file-service:8080"
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend
+spec:
+  ports:
+  - port: 3000
+  selector:
+    app: {{ .Release.Name }}-frontend
+---
+{{- if .Values.frontend.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-frontend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-frontend
+  minReplicas: {{ .Values.frontend.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.frontend.autoscaling.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+{{- end }}

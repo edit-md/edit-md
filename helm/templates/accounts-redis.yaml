@@ -1,0 +1,38 @@
+{{- if .Values.accountsSessionsDb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-accounts-sessions-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-accounts-sessions-db
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-accounts-sessions-db
+    spec:
+      containers:
+      - name: accounts-sessions-db
+        image: "{{ .Values.accountsSessionsDb.image }}"
+        env:
+          - name: KEYDB_DATABASE
+            value: {{ .Values.accountsSessionsDb.dbName }}
+          - name: KEYDB_PASSWORD
+            value: {{ .Values.accountsSessionsDb.password }}
+        ports:
+          - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-accounts-sessions-db
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    app: {{ .Release.Name }}-accounts-sessions-db
+{{- end }}

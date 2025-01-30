@@ -1,0 +1,68 @@
+{{- if .Values.documentsDb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-documents-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-documents-db
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-documents-db
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.documentsDb.image }}
+        env:
+        - name: POSTGRES_DB
+          value: {{ .Values.documentsDb.dbName }}
+        - name: POSTGRES_USER
+          value: {{ .Values.documentsDb.user }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.documentsDb.password }}
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: {{ .Release.Name }}-documents-db-init
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-documents-db-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-documents-db-init
+data:
+  init.sql: |-
+{{ .Files.Get "files/db/documents/init/01-init-db.sql" | indent 4 }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-documents-db-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-documents-db
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: {{ .Release.Name }}-documents-db
+
+{{- end }}

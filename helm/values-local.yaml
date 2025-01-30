@@ -1,0 +1,9 @@
+global:
+  domain: 127.0.0.1
+  apiKey: "CHANGE_ME"
+  sessionCookie:
+    secure: false
+
+ingress:
+  nginx:
+    enabled: true

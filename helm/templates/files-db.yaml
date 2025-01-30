@@ -1,0 +1,68 @@
+{{- if .Values.filesDb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-files-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-files-db
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-files-db
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.filesDb.image }}
+        env:
+        - name: POSTGRES_DB
+          value: {{ .Values.filesDb.dbName }}
+        - name: POSTGRES_USER
+          value: {{ .Values.filesDb.user }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.filesDb.password }}
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: {{ .Release.Name }}-files-db-init
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-files-db-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-files-db-init
+data:
+  init.sql: |-
+{{ .Files.Get "files/db/files/init/01-init-file-db.sql" | indent 4 }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-files-db-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-files-db
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: {{ .Release.Name }}-files-db
+
+{{- end }}

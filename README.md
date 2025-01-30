@@ -36,3 +36,34 @@ If the frontend is not available, you can still interact with the services direc
 - **Logout:** [https://127.0.0.1/api/accounts/logout](https://127.0.0.1/api/accounts/logout)  
 
 This setup provides the core functionality for authenticating users and managing accounts, documents, and files in the collaborative editor.
+
+## Production
+### Remote
+
+The production environment is running in k8s. It can be deployed using the provided helm chart. The chart can be found in the `helm` directory.
+Before installing the chart, the `values.yaml` file should be updated with the appropriate values.
+The chart can be installed using the following command:
+
+```bash
+./helm/preprocess.sh
+helm install <name> ./helm
+```
+
+### Locally
+
+When running the chart locally in minikube it is recommended to [install the ingress controller](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/#enable-the-ingress-controller).  
+If running locally in minikube the ``values-local.yaml`` file should be used using the following command:
+
+```bash
+./helm/preprocess.sh
+helm install <name> ./helm -f ./helm/values-local.yaml
+```
+
+After installing it, it is possible to access the service using the minikube tunnel command:
+
+```bash
+minikube tunnel
+```
+
+The service will be available at the following URL:
+https://127.0.0.1/

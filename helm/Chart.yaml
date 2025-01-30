@@ -1,0 +1,6 @@
+apiVersion: v2
+name: edit-md
+description: A Helm chart for deploying the EditMD application
+type: application
+version: 1.0.0
+appVersion: "1.0"

@@ -211,11 +211,12 @@
 				<Editor
 					class="h-full"
 					bind:documentState
-					onchange={(ops: Operation[]) => {
+					onchange={async (ops: Operation[]) => {
 						if (socket) {
 							for (let op of ops) {
-								operationQueue.push(op);
-								socket.queueFromQueue(operationQueue);
+								if(await operationQueue.push(op)) {
+									await socket.queueFromQueue(operationQueue);
+								}
 							}
 						}
 					}}

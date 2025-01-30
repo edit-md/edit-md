@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-account-service
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-account-service
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-account-service
+    spec:
+      containers:
+      - name: account-service
+        image: "{{ .Values.accountService.image.repository }}:{{ .Values.accountService.image.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: {{ if .Values.accountsDb.enabled }}jdbc:postgresql://{{ .Release.Name }}-accounts-db:5432/{{ .Values.accountsDb.dbName }}{{ else }}jdbc:postgresql://{{ .Values.accountsDb.external.host }}:{{ .Values.accountsDb.external.port }}/{{ .Values.accountsDb.dbName }}{{ end }}
+        - name: SPRING_DATASOURCE_USERNAME
+          value: {{ .Values.accountsDb.user }}
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: {{ .Values.accountsDb.password }}
+        - name: REDIS_HOST
+          value: {{ if .Values.accountsSessionsDb.enabled }}{{ .Release.Name }}-accounts-sessions-db{{ else }}{{ .Values.accountsSessionsDb.external.host }}{{ end }}
+        - name: REDIS_PORT
+          value: "{{ if .Values.accountsSessionsDb.enabled }}6379{{ else }}{{ .Values.accountsSessionsDb.external.port }}{{ end }}"
+        - name: REDIS_PASSWORD
+          value: {{ .Values.accountsSessionsDb.password }}
+        - name: GITHUB_OAUTH_CLIENT_ID
+          value: {{ .Values.accountService.github.clientId }}
+        - name: GITHUB_OAUTH_CLIENT_SECRET
+          value: {{ .Values.accountService.github.clientSecret }}
+        - name: EDITMD_SESSION_COOKIE
+          value: {{ .Values.global.sessionCookie.name }}
+        - name: EDITMD_DOMAIN
+          value: https://{{ .Values.global.domain }}
+        - name: EDITMD_API_KEY
+          value: {{ .Values.global.apiKey }}
+        resources:
+          {{- toYaml .Values.accountService.resources | nindent 10 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-account-service
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: {{ .Release.Name }}-account-service
+---
+{{- if .Values.accountService.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-account-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-account-service
+  minReplicas: {{ .Values.accountService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.accountService.autoscaling.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+{{- end }}

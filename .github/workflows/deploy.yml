@@ -1,0 +1,38 @@
+name: Build Docker Images on Pull Request
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Tailscale
+      uses: tailscale/github-action@v3
+      with:
+        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        tags: tag:editmd
+    - name: Deploy to the cluster
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/ci/
+            git clone https://github.com/edit-md/edit-md.git
+            cd edit-md
+            helm upgrade editmd-prod ./helm -f ../values-env.yaml
+            kubectl rollout restart deployment -l app=editmd-prod
+            cd ../
+            rm -rf edit-md

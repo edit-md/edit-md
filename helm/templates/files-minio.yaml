@@ -1,0 +1,59 @@
+{{- if .Values.minio.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-files-minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-files-minio
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-files-minio
+    spec:
+      containers:
+      - name: minio
+        image: {{ .Values.minio.image }}
+        env:
+        - name: MINIO_ROOT_USER
+          value: {{ .Values.minio.accessKey }}
+        - name: MINIO_ROOT_PASSWORD
+          value: {{ .Values.minio.secretKey }}
+        volumeMounts:
+        - name: minio-data
+          mountPath: /data
+        command: ["minio"]
+        args:
+            - server
+            - /data
+      volumes:
+      - name: minio-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-files-minio-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-files-minio-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-files-minio
+spec:
+  ports:
+  - port: 9000
+    targetPort: 9000
+    protocol: TCP
+  selector:
+    app: {{ .Release.Name }}-files-minio
+
+{{- end }}
