@@ -1,14 +1,30 @@
 import { Semaphore, type Permit } from "@shopify/semaphore";
-import type { Operation } from "./operations";
+import { InsertOperation, type Operation } from "./operations";
 
 export default class OperationQueue {
   private operations: Operation[] = [];
   private mutex = new Semaphore(1);
 
-  public async push(operation: Operation) {
+  public async push(operation: Operation): Promise<boolean> {
     const permit = await this.mutex.acquire();
+
+    for(let i = 0; i < this.operations.length; i++) {
+      const currentOperation = this.operations[i];
+      if(currentOperation instanceof InsertOperation && operation instanceof InsertOperation) {
+        const insertOperation = currentOperation as InsertOperation;
+        if(insertOperation.index + insertOperation.length === operation.index) {
+          insertOperation.content += operation.content;
+          insertOperation.length += operation.length;
+          this.operations[i] = insertOperation;
+          permit.release();
+          return false;
+        }
+      }
+    }
+
     this.operations.push(operation);
     permit.release();
+    return true;
   }
 
   public async shift() {
