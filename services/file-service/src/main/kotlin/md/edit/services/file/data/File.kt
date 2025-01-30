@@ -12,6 +12,9 @@ data class File(
     @Column(name = "document_id", nullable = false)
     val documentId: UUID,
 
+    @Column(name = "name", nullable = false)
+    val name: String,
+
     @Column(name = "path", nullable = false)
     val path: String = "/${id}",
 
@@ -29,11 +32,13 @@ data class File(
 ) {
     constructor(
         documentId: UUID,
+        name: String,
         type: String,
         createdDate: java.time.LocalDateTime,
     ) : this(
         id = UUID.randomUUID(),
         documentId = documentId,
+        name = name,
         type = type,
         createdDate = createdDate,
         uploaded = false,
