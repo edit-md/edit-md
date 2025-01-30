@@ -170,6 +170,10 @@
 
 		view.dispatch(transaction);
 	}
+
+	export function getCursorPosition() {
+		return view.state.selection.main.head;
+	}
 </script>
 
 <ScrollArea.Root class="relative h-full w-full {className}">

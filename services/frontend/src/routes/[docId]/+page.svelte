@@ -179,9 +179,9 @@
 						await finishFileUpload(fileInfo);
 
 						if(file.type.startsWith('image/')) {
-							editor.insertText(documentState.lastCursor, `![${file.name}](https://${window.location.hostname}/api/files/image/${fileInfo.id})`, true);
+							editor.insertText(editor.getCursorPosition(), `![${file.name}](https://${window.location.hostname}/api/files/image/${fileInfo.id})`, true);
 						} else {
-							editor.insertText(documentState.lastCursor, `![${file.name}](https://${window.location.hostname}/api/files/${fileInfo.id})`, true);
+							editor.insertText(editor.getCursorPosition(), `![${file.name}](https://${window.location.hostname}/api/files/${fileInfo.id})`, true);
 						}
 					}
 				}>

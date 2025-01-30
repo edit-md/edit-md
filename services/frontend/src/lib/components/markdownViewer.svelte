@@ -58,7 +58,7 @@
 				image({ href, text }) {
 					if (href.includes(env.PUBLIC_EDITMD_DOMAIN)) {
 						if (href.includes('image')) {
-							return `<img src="${href}/download" alt="${text}" class="max-w-full" />`;
+							return `<img src="${href}" alt="${text}" class="max-w-full" />`;
 						}
 						
 						return `<file-download data-file="${href}"></file-download>`;
@@ -144,6 +144,25 @@
 					generateDownloadComponent(file));
 			});
 		}
+
+		// get all image elements and replace their src with the download url
+		const imageElements = sanitized.match(/<img[^>]*>/g);
+
+		imageElements?.forEach((element, index) => {
+			const src = element.match(/src="([^"]*)"/);
+			const srcUrl = src?.[1];
+
+			if(srcUrl === undefined) {
+				return;
+			}
+
+			if(srcUrl.includes(env.PUBLIC_EDITMD_DOMAIN) && srcUrl.includes('image')) {
+				sanitized = sanitized.replace(
+					src[0],
+					`src="${srcUrl}/download"`
+				);
+			}
+		});
 
 		parsed = sanitized;
 
