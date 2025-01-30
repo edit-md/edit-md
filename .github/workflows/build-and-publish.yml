@@ -66,12 +66,3 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/frontend:latest
             ghcr.io/${{ github.repository }}/frontend:${{ env.COMMIT_HASH }}
-
-      - name: Build and push dev-nginx
-        uses: docker/build-push-action@v6
-        with:
-          context: ./dev/nginx
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}/dev-nginx:latest
-            ghcr.io/${{ github.repository }}/dev-nginx:${{ env.COMMIT_HASH }}
