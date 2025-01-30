@@ -22,17 +22,17 @@ jobs:
         oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
         tags: tag:editmd
     - name: Deploy to the cluster
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd /home/ci/
-            git clone https://github.com/edit-md/edit-md.git
-            cd edit-md
-            helm upgrade editmd-prod ./helm -f ../values-env.yaml
-            kubectl rollout restart deployment -l app=editmd-prod
-            cd ../
-            rm -rf edit-md
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/ci/
+          git clone https://github.com/edit-md/edit-md.git
+          cd edit-md
+          helm upgrade editmd-prod ./helm -f ../values-env.yaml
+          kubectl rollout restart deployment -l app=editmd-prod
+          cd ../
+          rm -rf edit-md
