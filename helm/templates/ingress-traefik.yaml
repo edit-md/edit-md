@@ -41,8 +41,8 @@ spec:
     middlewares:
       - name: {{ .Release.Name }}-add-trailing-slash
     services:
-      - name: {{ .Values.services.account.name }}
-        port: {{ .Values.services.account.port }}
+      - name: {{ .Release.Name }}-account-service
+        port: 8080
   - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/api/documents`, `/api/documents/`)
     kind: Rule
     entryPoints:
@@ -50,8 +50,8 @@ spec:
     middlewares:
       - name: {{ .Release.Name }}-add-trailing-slash
     services:
-      - name: {{ .Values.services.document.name }}
-        port: {{ .Values.services.document.port }}
+      - name: {{ .Release.Name }}-document-service
+        port: 8080
   - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/api/files`, `/api/files/`)
     kind: Rule
     entryPoints:
@@ -59,15 +59,15 @@ spec:
     middlewares:
       - name: {{ .Release.Name }}-add-trailing-slash
     services:
-      - name: {{ .Values.services.file.name }}
-        port: {{ .Values.services.file.port }}
+      - name: {{ .Release.Name }}-file-service
+        port: 8080
   - match: Host(`{{ .Values.global.domain }}`) && PathPrefix(`/`)
     kind: Rule
     entryPoints:
       - {{ .Values.ingress.traefik.entryPoints.websecure }}
     services:
-      - name: {{ .Values.services.frontend.name }}
-        port: {{ .Values.services.frontend.port }}
+      - name: {{ .Release.Name }}-frontend
+        port: 3000
   tls:
     secretName: {{ .Values.ingress.tls.secretName }}
 {{- end }}
