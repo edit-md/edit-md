@@ -22,7 +22,7 @@ export const load: PageServerLoad = async (req) => {
 		} else if (e instanceof DOMException && e.name === 'AbortError') {
 			console.log('Request to document-service timed out');
 		} else {
-			console.log('Unexpected error:', e);
+			console.log('Unexpected error DOCUMENT:', e);
 			redirect(302, '/');
 		}
 	}
@@ -35,7 +35,7 @@ export const load: PageServerLoad = async (req) => {
 		} else if (e instanceof DOMException && e.name === 'AbortError') {
 			console.log('Request to document-service timed out');
 		} else {
-			console.log('Unexpected error:', e);
+			console.log('Unexpected error FILE:', e);
 			redirect(302, '/');
 		}
 	}

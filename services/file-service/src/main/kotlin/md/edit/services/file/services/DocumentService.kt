@@ -35,6 +35,7 @@ class DocumentService(private val restTemplate: RestTemplate) {
 
             return response.body
         } catch (e: Exception) {
+            e.printStackTrace()
             return null
         }
     }
