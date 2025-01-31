@@ -1,5 +1,9 @@
 # edit.md - The Collaborative Markdown Editor
 
+<img align="right" width="125" height="125" src="https://github.com/user-attachments/assets/c8f6f834-0f73-4069-90ba-c06abe8362b0" >
+
+edit.md is a real-time collaborative Markdown editor that allows multiple users to work on documents simultaneously. It supports access control for public, private, and shared documents, GitHub OAuth authentication, and file uploads with image previews. The editor is designed to be easily deployed using Docker for development and Kubernetes with Helm charts for production, ensuring a consistent and flexible setup.
+
 ## Features
 - Create public / private documents
 - Share documents with other users (write or read access)
