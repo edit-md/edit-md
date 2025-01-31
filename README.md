@@ -17,7 +17,7 @@ _[Screenshots](#screenshots)_
 #### Helm-Chart-Features
 - Health checks
 - Autoscaling
-- All needed Databases and MinIO (but also the option to use external ones)
+- Includes all needed Databases and MinIO (but also the option to use external ones)
 - Nginx and Traefik Ingress supported
 
 ---
