@@ -73,7 +73,7 @@ The services will be available at the following URL:
 
 ## Service Overview
 
-![A view of all services and how they interact with each other](https://edit.md/api/files/image/ece1ecc8-339f-492b-83b0-7b082aecdb7b/download)
+![A view of all services and how they interact with each other](https://private-user-images.githubusercontent.com/63405129/408598596-e304fbc9-0e1c-4d37-bb5f-2fb48b1362ac.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzgzMzM1OTIsIm5iZiI6MTczODMzMzI5MiwicGF0aCI6Ii82MzQwNTEyOS80MDg1OTg1OTYtZTMwNGZiYzktMGUxYy00ZDM3LWJiNWYtMmZiNDhiMTM2MmFjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAxMzElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMTMxVDE0MjEzMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTk0NzBkZDQyMDk5OWVlODE0NmI0OWZjMDgzYjM0YzlkYjRhMmUxMDQ0N2FkMTkzYjJjZmYxZGQ5ZTNhM2JhZGImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ESzd0rC__fyWsgYb8fwmxVb_bm8dbfjlNiuxnqcAqVk)
 
 ### Frontend
 The frontend service is a SvelteKit application that provides the user interface for the collaborative editor. It allows users to create, edit, and share documents with other users. The frontend communicates with the account, document, and file services to prerender all the necessary data for the user interface.
