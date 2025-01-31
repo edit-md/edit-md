@@ -99,18 +99,6 @@ class DocumentService(
 
         document = documentRepository.save(document)
 
-        // Save the initial state
-        val documentChange = DocumentChange(
-            DocumentChangeId(document.id, 0.toULong()),
-            owner.id,
-            null,
-            0.toULong(),
-            DocumentChangeType.INSERT,
-            "",
-            0.toULong()
-        )
-        documentChangeRepository.save(documentChange)
-
         if (shares == null) {
             return document
         }

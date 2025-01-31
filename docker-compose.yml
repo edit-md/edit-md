@@ -101,6 +101,10 @@ services:
             - EDITMD_FRONTEND_HOST=http://frontend
             - EDITMD_ACCOUNT_SERVICE_HOST=http://account-service:8080
 
+            - REDIS_HOST=document-live-redis
+            - REDIS_PORT=6379
+            - REDIS_PASSWORD=${LIVE_REDIS_PASSWORD}
+
             - SPRING_DATASOURCE_URL=jdbc:postgresql://documents-db:5432/${DOCUMENT_DB_NAME}
             - SPRING_DATASOURCE_USERNAME=${DOCUMENT_DB_USER}
             - SPRING_DATASOURCE_PASSWORD=${DOCUMENT_DB_PASSWORD}
@@ -130,6 +134,19 @@ services:
             - ./dev/db/documents/init:/docker-entrypoint-initdb.d
         healthcheck:
             test: [ "CMD-SHELL", "pg_isready -U admin" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - document-service-net
+
+    document-live-redis:
+        image: bitnami/keydb:6.3.4
+        environment:
+            - KEYDB_DATABASE=live
+            - KEYDB_PASSWORD=${LIVE_REDIS_PASSWORD}
+        healthcheck:
+            test: [ "CMD", "keydb-cli", "-a", "${LIVE_REDIS_PASSWORD}", "--raw", "incr", "ping" ]
             interval: 10s
             timeout: 5s
             retries: 5

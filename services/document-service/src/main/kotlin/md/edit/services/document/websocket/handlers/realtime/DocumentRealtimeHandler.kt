@@ -8,7 +8,6 @@ import md.edit.services.document.data.DocumentChange
 import md.edit.services.document.dtos.toDTO
 import md.edit.services.document.exceptions.InvalidIdException
 import md.edit.services.document.services.DocumentService
-import md.edit.services.document.utils.toByteArray
 import md.edit.services.document.websocket.handlers.ParameterizedWebSocketHandler
 import md.edit.services.document.websocket.handlers.realtime.commands.DeleteCommand
 import md.edit.services.document.websocket.handlers.realtime.commands.DocumentCommand
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.socket.BinaryMessage
 import org.springframework.web.socket.CloseStatus
-import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketMessage
 import org.springframework.web.socket.WebSocketSession
 import java.util.*

@@ -4,7 +4,10 @@ import md.edit.services.document.configuration.cookieauth.CookieAuthenticationSe
 import md.edit.services.document.configuration.cookieauth.CustomUserDetails
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.web.socket.*
+import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.WebSocketHandler
+import org.springframework.web.socket.WebSocketMessage
+import org.springframework.web.socket.WebSocketSession
 
 abstract class AuthenticatedWebSocketHandler : WebSocketHandler {
 

@@ -8,7 +8,6 @@ import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
-import java.sql.SQLException
 import java.util.function.Consumer
 import javax.sql.DataSource
 

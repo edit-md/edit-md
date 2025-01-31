@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.util.*
-import java.util.stream.Collectors
 
 @RestController
 class DocumentController(

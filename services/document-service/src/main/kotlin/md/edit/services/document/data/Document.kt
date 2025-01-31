@@ -2,7 +2,6 @@ package md.edit.services.document.data
 
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcType
-import org.hibernate.annotations.Type
 import org.hibernate.dialect.PostgreSQLEnumJdbcType
 import java.util.*
 
