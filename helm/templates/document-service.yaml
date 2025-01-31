@@ -33,6 +33,12 @@ spec:
           value: https://{{ .Values.global.domain }}
         - name: EDITMD_API_KEY
           value: {{ .Values.global.apiKey }}
+        - name: REDIS_HOST
+          value: {{ if .Values.documentsLiveDb.enabled }}{{ .Release.Name }}-document-live-db{{ else }}{{ .Values.documentsLiveDb.external.host }}{{ end }}
+        - name: REDIS_PORT
+          value: "{{ if .Values.documentsLiveDb.enabled }}6379{{ else }}{{ .Values.documentsLiveDb.external.port }}{{ end }}"
+        - name: REDIS_PASSWORD
+          value: {{ .Values.documentsLiveDb.password }}
         resources:
           {{- toYaml .Values.documentService.resources | nindent 10 }}
 ---

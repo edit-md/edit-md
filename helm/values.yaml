@@ -97,6 +97,13 @@ accountsSessionsDb:
   password: accounts
   external: null  # {host: "", port: 6379}
 
+documentsLiveDb:
+  enabled: true
+  image: bitnami/keydb:6.3.4
+  dbName: live
+  password: documents
+  external: null  # {host: "", port: 6379}
+
 minio:
   enabled: true
   image: quay.io/minio/minio
