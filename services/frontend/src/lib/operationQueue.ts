@@ -8,7 +8,7 @@ export default class OperationQueue {
   public async push(operation: Operation): Promise<boolean> {
     const permit = await this.mutex.acquire();
 
-    for(let i = 0; i < this.operations.length; i++) {
+    /*for(let i = 0; i < this.operations.length; i++) {
       const currentOperation = this.operations[i];
       if(currentOperation instanceof InsertOperation && operation instanceof InsertOperation) {
         const insertOperation = currentOperation as InsertOperation;
@@ -20,7 +20,7 @@ export default class OperationQueue {
           return false;
         }
       }
-    }
+    }*/
 
     this.operations.push(operation);
     permit.release();

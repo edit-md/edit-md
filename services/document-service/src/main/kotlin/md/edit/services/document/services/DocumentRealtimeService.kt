@@ -1,6 +1,9 @@
 package md.edit.services.document.services
 
-import md.edit.services.document.data.*
+import md.edit.services.document.data.DocumentChange
+import md.edit.services.document.data.DocumentChangeId
+import md.edit.services.document.data.DocumentChangeType
+import md.edit.services.document.data.DocumentData
 import md.edit.services.document.exceptions.AuthorizationException
 import md.edit.services.document.exceptions.DocumentNotFoundException
 import md.edit.services.document.repos.DocumentChangeRepository
@@ -9,7 +12,6 @@ import md.edit.services.document.utils.AuthorizationUtils
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 import java.util.*
 
 @Service
@@ -28,15 +30,19 @@ class DocumentRealtimeService(
         changeType: DocumentChangeType,
         index: ULong,
         content: String
-    ): DocumentChange {
+    ): DocumentChange? {
         if(!documentService.hasWriteAccess(authentication, documentId) || authentication == null) {
             throw AuthorizationException()
         }
 
         val user = AuthorizationUtils.onlyUser(authentication)
+        val documentContent = documentDataRepository.findByIdForUpdate(documentId).orElseThrow { DocumentNotFoundException() }
 
-        val documentContent = documentDataRepository.findById(documentId).orElseThrow { DocumentNotFoundException() }
-        documentContent.revision++
+        if (revision > documentContent.revision) {
+            throw RuntimeException("Revision is greater than document revision")
+        }
+
+        val recordedChanges = documentChangeRepository.findByDocumentIdForUpdate(documentId)
 
         var documentChange = DocumentChange(
             id = DocumentChangeId(documentId, revision),
@@ -48,8 +54,7 @@ class DocumentRealtimeService(
             length = content.length.toULong(),
         )
 
-        documentChange =
-            applyChange(documentContent, documentChange) ?: throw RuntimeException("Failed to apply change")
+        documentChange = applyChange(documentContent, documentChange, recordedChanges) ?: throw RuntimeException("Failed to apply change (insert) is null")
 
         documentChangeRepository.save(documentChange)
         documentContent.lastModified = Date()
@@ -71,16 +76,19 @@ class DocumentRealtimeService(
         changeType: DocumentChangeType,
         index: ULong,
         length: ULong
-    ): DocumentChange {
+    ): DocumentChange? {
         if(!documentService.hasWriteAccess(authentication, documentId) || authentication == null) {
             throw AuthorizationException()
         }
 
         val user = AuthorizationUtils.onlyUser(authentication)
+        val documentContent = documentDataRepository.findByIdForUpdate(documentId).orElseThrow { DocumentNotFoundException() }
 
-        val documentContent =
-            documentDataRepository.findById(documentId).orElseThrow { DocumentNotFoundException() }
-        documentContent.revision++
+        if (revision > documentContent.revision) {
+            throw RuntimeException("Revision is greater than document revision")
+        }
+
+        val recordedChanges = documentChangeRepository.findByDocumentIdForUpdate(documentId)
 
         var documentChange = DocumentChange(
             id = DocumentChangeId(documentId, revision),
@@ -92,8 +100,7 @@ class DocumentRealtimeService(
             length = length
         )
 
-        documentChange =
-            applyChange(documentContent, documentChange) ?: throw RuntimeException("Failed to apply change")
+        documentChange = applyChange(documentContent, documentChange, recordedChanges) ?: throw RuntimeException("Failed to apply change (insert) is null")
 
         documentChangeRepository.save(documentChange)
         documentContent.lastModified = Date()
@@ -106,28 +113,23 @@ class DocumentRealtimeService(
         return documentChange
     }
 
-    private fun applyChange(document: DocumentData, c: DocumentChange): DocumentChange {
-        var change = c
-        val changeRevision = change.id.revision
+    private fun applyChange(document: DocumentData, change: DocumentChange, recordedChanges: MutableList<DocumentChange>): DocumentChange? {
+        var c = change
+        val changeRevision = c.id.revision
         val documentRevision = document.revision
 
-        if (changeRevision > documentRevision) {
-            throw RuntimeException("Change revision is too far ahead")
-        }
-
-
         for (i in changeRevision + 1u until documentRevision) {
-            val doneOperation = documentChangeRepository.findById(DocumentChangeId(document.id, i))
-                .orElseThrow { RuntimeException("Failed to find change") }
-            val transformedOperation =
-                transformChange(change, doneOperation) ?: throw RuntimeException("Failed to transform change")
-            change = transformedOperation
+            val doneOperation = recordedChanges.find { it.id.revision == i } ?: return null
+            val transformedOperation = transformChange(c, doneOperation) ?: return null
+            c = transformedOperation
         }
 
-        change.id.revision = documentRevision
+        c = c.copy(id = c.id.copy(revision = document.revision))
+        applyOperation(document, c)
 
-        applyOperation(document, change)
-        return change
+        document.revision++
+
+        return c
     }
 
     private fun transformChange(op1: DocumentChange, op2: DocumentChange): DocumentChange? {
@@ -165,8 +167,7 @@ class DocumentRealtimeService(
                 return op1
             }
 
-            if (op1.index in op2.index until deleteEnd) {
-                // Insert occurs within the delete range, discard the insert
+            if (op1.index >= op2.index && op1.index < op2.index + op2.length) {
                 return null
             }
 
@@ -199,7 +200,7 @@ class DocumentRealtimeService(
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            throw RuntimeException("Failed to apply change", e)
         }
     }
 }

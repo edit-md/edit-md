@@ -57,18 +57,6 @@
 		socket.onMessage((message) => {
 			let json = JSON.parse(message.data);
 
-			let ack = message.commandId === 1;
-			// set the revision to the latest revision
-			if (ack) {
-				operationQueue.map((op) => {
-					op.revision = json.r;
-					return op;
-				});
-				documentState.revision = json.r;
-				socket.ack();
-				return;
-			}
-
 			let remoteOp: Operation;
 
 			if (json.t === 0) {
@@ -79,6 +67,18 @@
 				remoteOp = new DeleteOperation(json.r, json.i, json.l);
 			} else {
 				console.error('Unknown operation type:', json.type);
+				return;
+			}
+
+			let ack = message.commandId === 1;
+			// set the revision to the latest revision
+			if (ack) {
+				operationQueue.map((op) => {
+					op.revision = remoteOp.revision;
+					return op;
+				});
+				documentState.revision = remoteOp.revision;
+				socket.ack();
 				return;
 			}
 
@@ -214,9 +214,8 @@
 					onchange={async (ops: Operation[]) => {
 						if (socket) {
 							for (let op of ops) {
-								if(await operationQueue.push(op)) {
-									await socket.queueFromQueue(operationQueue);
-								}
+								await operationQueue.push(op);
+								await socket.queueFromQueue(operationQueue);
 							}
 						}
 					}}

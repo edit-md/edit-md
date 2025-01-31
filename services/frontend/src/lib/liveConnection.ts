@@ -73,7 +73,13 @@ export default class LiveConnection {
     }
 
     ack() {
-        this.waitingForAck.shift()?.permit.release();
+        let ack = this.waitingForAck.shift();
+
+        if(!ack) {
+            return;
+        }
+
+        ack.permit.release();
     }
 
     onMessage(callback: (data: ReceivedMessage) => void) {
@@ -105,6 +111,7 @@ export default class LiveConnection {
         if(op) {
             this.waitingForAck.push({ obj: op, permit });
             let data = this.convertToCommand(op.commandId, op.toTransport());
+            console.log('SENDING', op);
             this.send(data);
         } else {
             permit.release();
