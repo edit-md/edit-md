@@ -71,14 +71,10 @@
 			headers: {
 				'Content-Type': 'application/json',
 				'X-CSRF-Protection': '1'
-			},
-			body: JSON.stringify({
-				userId: formData.userId.value
-			})
+			}
 		});
 
 		if (resp.ok) {
-			console.log(await resp.json());
 			await loadDocumentShares();
 		} else {
 			const data = await resp.text();
