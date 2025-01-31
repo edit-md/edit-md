@@ -1,5 +1,23 @@
 # edit.md - The Collaborative Markdown Editor
 
+## Features
+- Create public / private documents
+- Share documents with other users (write or read access)
+- Edit documents concurrently with other users (live sync using websockets)
+- Upload files (with image preview) (stored in S3)
+- Login using GitHub Account
+
+_[Screenshots](#screenshots)_
+
+
+#### Helm-Chart-Features
+- Health checks
+- Autoscaling
+- All needed Databases and MinIO (but also the option to use external ones)
+- Nginx and Traefik Ingress supported
+
+---
+
 ## Development
 Dev-Prod parity is maintained by running all services in containers, ensuring that the development and production environments remain as similar as possible. This setup minimizes discrepancies between the two environments, making it easier to catch and fix issues early. In theory, no dev tools or build tools need to be installed on the development machine, even though we would not recommend that. All containers have a development target that starts the services with hot reload functionality, allowing for seamless editing and updates. While the hot reload feature may take some time for Spring Boot services, it should still function correctly. However, switching branches or making significant changes may require a container restart. 
 
@@ -16,7 +34,7 @@ To get started, first copy the example environment configuration file and fill i
   ```bash
   cp .env.example .env
   ```
-
+  
 ### Starting the Containers
 Once the environment file is configured, start all the necessary containers using the command below. This process may take some time as the services are initialized. The command ensures that all services start and automatically restart whenever source files change.
 ```bash
@@ -86,3 +104,13 @@ The document service is a Spring Boot application that manages documents in the 
 
 ### File Service
 The file service is a Spring Boot application that manages files in the collaborative editor. It provides endpoints for uploading, downloading, and deleting files as well as provides file preview functionality for images. It also provides endpoints for retrieving file information and files for specific documents.
+
+---
+
+## Screenshots
+
+![Dashboard](https://github.com/user-attachments/assets/2967086d-1f95-4f2e-b560-4096cb0dd6df)
+
+![View only document](https://github.com/user-attachments/assets/db73e32e-4bb4-4ce8-ad8f-3d60a171fd6f)
+
+![Document editor](https://github.com/user-attachments/assets/c531dcff-2d25-4b5e-bed7-90315a360e02)
