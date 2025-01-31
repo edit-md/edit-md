@@ -3,6 +3,7 @@ package md.edit.services.document.realtime
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.github.oshai.kotlinlogging.KotlinLogging
 import md.edit.services.document.data.DocumentChange
 import md.edit.services.document.websocket.handlers.realtime.DocumentRealtimeHandler
 import org.postgresql.PGNotification
@@ -15,6 +16,7 @@ class NotificationHandler(
     private val documentRealtimeHandler: DocumentRealtimeHandler,
 ) : Consumer<PGNotification> {
 
+    private val log = KotlinLogging.logger {}
 
     private val objectMapper = ObjectMapper().apply {
         propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
@@ -26,7 +28,7 @@ class NotificationHandler(
         // convert t.parameter to DocumentChange
         val objectChange = objectMapper.readValue(t.parameter, DocumentChange::class.java)
 
-        println("Received notification: $objectChange")
+        log.trace { "Received notification: $objectChange" }
 
         documentRealtimeHandler.broadcastChange(objectChange.id.documentId!!, objectChange)
     }

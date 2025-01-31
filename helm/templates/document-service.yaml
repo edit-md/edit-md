@@ -39,6 +39,18 @@ spec:
           value: "{{ if .Values.documentsLiveDb.enabled }}6379{{ else }}{{ .Values.documentsLiveDb.external.port }}{{ end }}"
         - name: REDIS_PASSWORD
           value: {{ .Values.documentsLiveDb.password }}
+        livenessProbe:
+          httpGet:
+            path: /api/documents/actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /api/documents/actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
         resources:
           {{- toYaml .Values.documentService.resources | nindent 10 }}
 ---

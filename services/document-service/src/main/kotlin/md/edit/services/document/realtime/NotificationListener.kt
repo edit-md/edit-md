@@ -1,9 +1,13 @@
 package md.edit.services.document.realtime
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import md.edit.services.document.configuration.health.NotificationListenerIndicator
 import org.postgresql.PGConnection
 import org.postgresql.PGNotification
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.availability.AvailabilityChangeEvent
+import org.springframework.boot.availability.ReadinessState
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
@@ -14,9 +18,10 @@ import javax.sql.DataSource
 
 @Component
 class NotificationListener(
-    private val dataSource: DataSource
+    private val dataSource: DataSource,
+    private val notificationListenerIndicator: NotificationListenerIndicator,
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
-
     @Value("\${edit-md.realtime.notifications.timeout:1000}")
     private var timeout: Int = 1000
 
@@ -39,6 +44,8 @@ class NotificationListener(
                     }
 
                     while (true) {
+                        notificationListenerIndicator.setAlive(true)
+                        AvailabilityChangeEvent.publish(applicationEventPublisher, this, ReadinessState.ACCEPTING_TRAFFIC)
                         val nts = con.getNotifications(timeout) ?: continue
                         for (nt in nts) {
                             consumer.accept(nt!!)
@@ -46,6 +53,7 @@ class NotificationListener(
                     }
                 }
             } catch (e: Exception) {
+                notificationListenerIndicator.setAlive(false)
                 if(shouldStop) {
                     log.info { "Realtime notification listener stopped" }
                     return

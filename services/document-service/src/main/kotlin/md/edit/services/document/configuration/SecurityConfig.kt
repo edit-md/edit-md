@@ -17,7 +17,6 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsUtils
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
-
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
@@ -64,6 +63,7 @@ class SecurityConfig(
 
         http.authorizeHttpRequests {
             it.requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+            it.requestMatchers("/actuator/**").permitAll()
             it.anyRequest().permitAll()
         }
 
