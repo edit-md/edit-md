@@ -45,6 +45,18 @@ spec:
           value: https://{{ .Values.global.domain }}
         - name: EDITMD_API_KEY
           value: {{ .Values.global.apiKey }}
+        livenessProbe:
+          httpGet:
+            path: /api/files/actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /api/files/actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
         resources:
           {{- toYaml .Values.fileService.resources | nindent 10 }}
 ---

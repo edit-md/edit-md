@@ -32,6 +32,18 @@ spec:
           value: "http://{{ .Release.Name }}-document-service:8080"
         - name: EDITMD_FILE_SERVICE_HOST
           value: "http://{{ .Release.Name }}-file-service:8080"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
         resources:
           {{- toYaml .Values.frontend.resources | nindent 10 }}
 ---

@@ -95,9 +95,8 @@
 			<artifactId>postgresql</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.aayushatharva.brotli4j</groupId>
-			<artifactId>brotli4j</artifactId>
-			<version>1.18.0</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 	</dependencies>
 

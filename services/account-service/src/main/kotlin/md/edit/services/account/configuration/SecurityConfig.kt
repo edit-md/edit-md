@@ -57,6 +57,7 @@ class SecurityConfig(
 
         http.authorizeHttpRequests {
             it.requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+            it.requestMatchers("/actuator/**").permitAll()
             it.anyRequest().authenticated()
         }
 

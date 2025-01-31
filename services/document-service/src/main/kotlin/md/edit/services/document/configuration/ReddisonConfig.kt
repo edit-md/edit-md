@@ -30,8 +30,6 @@ class RedissonConfig {
         config.useSingleServer().password = redisPassword
         config.useSingleServer().database = redisDatabase.toInt()
 
-        println("REDISSON BEAN CREATED")
-
         return Redisson.create(config);
     }
 }
