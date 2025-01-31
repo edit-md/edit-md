@@ -45,13 +45,13 @@ spec:
           httpGet:
             path: /api/accounts/actuator/health/liveness
             port: 8080
-          initialDelaySeconds: 3
+          initialDelaySeconds: 30
           periodSeconds: 3
         readinessProbe:
           httpGet:
             path: /api/accounts/actuator/health/readiness
             port: 8080
-          initialDelaySeconds: 3
+          initialDelaySeconds: 30
           periodSeconds: 3
         resources:
           {{- toYaml .Values.accountService.resources | nindent 10 }}

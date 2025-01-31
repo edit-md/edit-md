@@ -36,13 +36,13 @@ spec:
           httpGet:
             path: /
             port: 3000
-          initialDelaySeconds: 3
+          initialDelaySeconds: 30
           periodSeconds: 3
         readinessProbe:
           httpGet:
             path: /
             port: 3000
-          initialDelaySeconds: 3
+          initialDelaySeconds: 30
           periodSeconds: 3
         resources:
           {{- toYaml .Values.frontend.resources | nindent 10 }}
